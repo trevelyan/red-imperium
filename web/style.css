@@ -299,6 +299,38 @@ body {
   float: left;
 }
 
+.strategycard {
+ width:180px;
+ height: 252px;
+ position: relative;
+ background-size: cover;
+}
+.strategycard_name {
+ position: relative;
+ top: 6%;
+ font-weight: bold;
+ text-align: center;
+ width: inherit;
+ margin-left: auto;
+ margin-right: auto;
+}
+
+
+.actioncard {
+ width:180px;
+ height: 252px;
+ position: relative;
+ background-size: cover;
+}
+.actioncard_name {
+ position: relative;
+ top: 6%;
+ font-weight: bold;
+ text-align: center;
+ width: inherit;
+ margin-left: auto;
+ margin-right: auto;
+}
 
 
 
