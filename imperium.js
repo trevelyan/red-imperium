@@ -720,11 +720,9 @@ Imperium.prototype.playerTurn = function playerTurn(stage="main") {
     }
 
 
+    html += '<li class="option" id="planetcards">planetcards</li>';
     html += '<li class="option" id="pass">pass</li>';
     html += '</ul>';
-
-    html += '<p></p>';
-    html += this.returnPlanetCard('planet1');
 
     this.updateStatus(html);
 
@@ -732,6 +730,20 @@ Imperium.prototype.playerTurn = function playerTurn(stage="main") {
 
       let action2 = $(this).attr("id");
 
+      if (action2 == "planetcards") {
+        imperium_self.playerActivateSystem();
+      }
+      if (action2 == "activate") {
+        imperium_self.playerActivateSystem();
+      }
+
+      if (action2 == "activate") {
+        imperium_self.playerActivateSystem();
+      }
+
+      if (action2 == "planetcards") {
+ 	imperium_self.updateStatus(imperium_self.returnPlanetCard('planet1'));
+      }
       if (action2 == "activate") {
         imperium_self.playerActivateSystem();
       }
@@ -802,7 +814,7 @@ Imperium.prototype.playerProduceUnits = function playerProduceUnits(sector) {
 	total_cost += imperium_self.returnUnitCost(stuff_to_build[i]);
       }
 
-      imperium_self.playerSelectInfluence(total_cost, function(success) {
+      imperium_self.playerSelectResources(total_cost, function(success) {
 
 	if (success == 1) {
 
@@ -832,25 +844,83 @@ Imperium.prototype.playerProduceUnits = function playerProduceUnits(sector) {
     //
     stuff_to_build.push(id);
 
+    let total_cost = 0;
+    for (let i = 0; i < stuff_to_build.length; i++) {
+      total_cost += imperium_self.returnUnitCost(stuff_to_build[i]);
+    }
+
     let divtotal = "." + id + "_total";
     let x = parseInt($(divtotal).html());
     x++;
     $(divtotal).html(x);
+
+
+
+    let resourcetxt = " resources";
+    if (total_cost == 1) { resourcetxt = " resource"; }
+    $('.buildcost_total').html(total_cost + resourcetxt);
 
   });
 
 }
 
 
+Imperium.prototype.playerSelectResources = function playerSelectResources(cost, mycallback) {
+
+  let imperium_self = this;
+  let array_of_cards = ['planet1','planet2','planet3','planet4'];
+  let array_of_cards_to_exhaust = [];
+  let selected_cost = 0;
+
+  let html  = "Select "+cost+" in resources: <p></p><ul>";
+  for (let z = 0; z < array_of_cards.length; z++) {
+    html += '<li class="cardchoice" id="cardchoice_'+array_of_cards[z]+'">' + this.returnPlanetCard(array_of_cards[z]) + '</li>';
+  }
+  html += '</ul>';
+
+  this.updateStatus(html);
+  $('.cardchoice').on('click', function() {
+
+    let action2 = $(this).attr("id");
+    let tmpx = action2.split("_");
+    
+    let divid = "#"+action2;
+    let y = tmpx[1];
+    let idx = 0;
+    for (let i = 0; i < array_of_cards.length; i++) {
+      if (array_of_cards[i] === y) {
+        idx = i;
+      } 
+    }
+
+
+    array_of_cards_to_exhaust.push(array_of_cards[idx]);
+
+    $(divid).off();
+    $(divid).css('opacity','0.3');
+
+console.log(JSON.stringify(imperium_self.game.planets));
+
+alert(y + " -- " + array_of_cards[idx]);
+
+
+    selected_cost += imperium_self.game.planets[array_of_cards[idx]].resources;
+
+    if (cost <= selected_cost) {
+      mycallback(1);
+    }
+
+    alert("ACTION: " + action2);
+
+  });
+
+}
 
 Imperium.prototype.playerSelectInfluence = function playerSelectInfluence(cost, mycallback) {
 
   let array_of_cards = ['planet1','planet2','planet3','planet4'];
   let selected_cost = 0;
 
-  cost = 1;
-
-  //
   // check to see if any ships survived....
   //
   let html  = "Select "+cost+" in influence: <p></p><ul>";
@@ -876,7 +946,8 @@ Imperium.prototype.playerSelectInfluence = function playerSelectInfluence(cost, 
 
 }
 
-Imperium.prototype.playerSelectStrategyCard = function playerSelectInfluence(mycallback) {
+
+Imperium.prototype.playerSelectStrategyCard = function playerSelectStrategyCard(mycallback) {
 
   let array_of_cards = this.returnStrategyCards();
 
@@ -1324,6 +1395,7 @@ Imperium.prototype.playerActivateSystem = function playerActivateSystem() {
 
   imperium_self.updateStatus(html);
 
+  $('.sector').off();
   $('.sector').on('click', function() {
 
     let pid = $(this).attr("id");
@@ -1332,9 +1404,11 @@ console.log("clicked on "+pid);
 
     if (imperium_self.canPlayerActivateSystem(pid) == 0) {
 
-      alert("You cannot activate that system...");
+      alert("You cannot activate that system: " + pid);
 
     } else {
+
+alert("activating: " + pid);
 
       let sys = imperium_self.returnSystemAndPlanets(pid);
       let divpid = '#'+pid;
@@ -2342,54 +2416,54 @@ Imperium.prototype.returnPlanets = function returnPlanets() {
   var planets = {};
 
   // homeworlds
-  planets['planet1']	= { img : "/imperium/images/card_template.jpg" , name : "Ganesh" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet2']	= { img : "/imperium/images/card_template.jpg" , name : "Troth" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet3']	= { img : "/imperium/images/card_template.jpg" , name : "Londrak" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet4']	= { img : "/imperium/images/card_template.jpg" , name : "Citadel" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet5']	= { img : "/imperium/images/card_template.jpg" , name : "Belvedere" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet6']	= { img : "/imperium/images/card_template.jpg" , name : "Shriva" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet7']	= { img : "/imperium/images/card_template.jpg" , name : "Zondor" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet8']	= { img : "/imperium/images/card_template.jpg" , name : "Calthrex" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet9']	= { img : "/imperium/images/card_template.jpg" , name : "Soundra IV" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet10']	= { img : "/imperium/images/card_template.jpg" , name : "Udon I" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet11']	= { img : "/imperium/images/card_template.jpg" , name : "Udon II" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet12']	= { img : "/imperium/images/card_template.jpg" , name : "New Jylanx" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet13']	= { img : "/imperium/images/card_template.jpg" , name : "Terra Core" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet14']	= { img : "/imperium/images/card_template.jpg" , name : "Granton Mex" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet15']	= { img : "/imperium/images/card_template.jpg" , name : "Harkon Caledonia" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet16']	= { img : "/imperium/images/card_template.jpg" , name : "New Byzantium" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet1']	= { img : "/imperium/images/planet_card_template.png" , name : "Ganesh" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet2']	= { img : "/imperium/images/planet_card_template.png" , name : "Troth" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet3']	= { img : "/imperium/images/planet_card_template.png" , name : "Londrak" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet4']	= { img : "/imperium/images/planet_card_template.png" , name : "Citadel" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet5']	= { img : "/imperium/images/planet_card_template.png" , name : "Belvedere" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet6']	= { img : "/imperium/images/planet_card_template.png" , name : "Shriva" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet7']	= { img : "/imperium/images/planet_card_template.png" , name : "Zondor" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet8']	= { img : "/imperium/images/planet_card_template.png" , name : "Calthrex" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet9']	= { img : "/imperium/images/planet_card_template.png" , name : "Soundra IV" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet10']	= { img : "/imperium/images/planet_card_template.png" , name : "Udon I" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet11']	= { img : "/imperium/images/planet_card_template.png" , name : "Udon II" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet12']	= { img : "/imperium/images/planet_card_template.png" , name : "New Jylanx" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet13']	= { img : "/imperium/images/planet_card_template.png" , name : "Terra Core" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet14']	= { img : "/imperium/images/planet_card_template.png" , name : "Granton Mex" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet15']	= { img : "/imperium/images/planet_card_template.png" , name : "Harkon Caledonia" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet16']	= { img : "/imperium/images/planet_card_template.png" , name : "New Byzantium" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
 
   // regular planets
-  planets['planet17']	= { img : "/imperium/images/card_template.jpg" , name : "Lazak's Curse" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet18']	= { img : "/imperium/images/card_template.jpg" , name : "Voluntra" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet19']	= { img : "/imperium/images/card_template.jpg" , name : "Xerxes IV" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet20']	= { img : "/imperium/images/card_template.jpg" , name : "Siren's End" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet21']	= { img : "/imperium/images/card_template.jpg" , name : "Riftview" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet22']	= { img : "/imperium/images/card_template.jpg" , name : "Broughton" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet23']	= { img : "/imperium/images/card_template.jpg" , name : "Fjordra" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet24']	= { img : "/imperium/images/card_template.jpg" , name : "Nova Klondike" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet25']	= { img : "/imperium/images/card_template.jpg" , name : "Contouri I" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet26']	= { img : "/imperium/images/card_template.jpg" , name : "Contouri II" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet27']	= { img : "/imperium/images/card_template.jpg" , name : "Hoth" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet28']	= { img : "/imperium/images/card_template.jpg" , name : "Unsulla" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet29']	= { img : "/imperium/images/card_template.jpg" , name : "Grox Towers" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet30']	= { img : "/imperium/images/card_template.jpg" , name : "Gravity's Edge" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet31']	= { img : "/imperium/images/card_template.jpg" , name : "Populax" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet32']	= { img : "/imperium/images/card_template.jpg" , name : "Old Moltour" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet33']	= { img : "/imperium/images/card_template.jpg" , name : "New Illia" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet34']	= { img : "/imperium/images/card_template.jpg" , name : "Outerant" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet35']	= { img : "/imperium/images/card_template.jpg" , name : "Vespar" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet36']	= { img : "/imperium/images/card_template.jpg" , name : "Coruscant" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet37']	= { img : "/imperium/images/card_template.jpg" , name : "Yssari II" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet38']	= { img : "/imperium/images/card_template.jpg" , name : "Hope's Lure" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet39']	= { img : "/imperium/images/card_template.jpg" , name : "Quandam" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet40']	= { img : "/imperium/images/card_template.jpg" , name : "Quandor" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet41']	= { img : "/imperium/images/card_template.jpg" , name : "Lorstruck" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet42']	= { img : "/imperium/images/card_template.jpg" , name : "Industryl" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet43']	= { img : "/imperium/images/card_template.jpg" , name : "Mechanex" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet44']	= { img : "/imperium/images/card_template.jpg" , name : "New Rome" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet45']	= { img : "/imperium/images/card_template.jpg" , name : "Incarth" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
-  planets['planet46']	= { img : "/imperium/images/card_template.jpg" , name : "Aandor" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet17']	= { img : "/imperium/images/planet_card_template.png" , name : "Lazak's Curse" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet18']	= { img : "/imperium/images/planet_card_template.png" , name : "Voluntra" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet19']	= { img : "/imperium/images/planet_card_template.png" , name : "Xerxes IV" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet20']	= { img : "/imperium/images/planet_card_template.png" , name : "Siren's End" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet21']	= { img : "/imperium/images/planet_card_template.png" , name : "Riftview" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet22']	= { img : "/imperium/images/planet_card_template.png" , name : "Broughton" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet23']	= { img : "/imperium/images/planet_card_template.png" , name : "Fjordra" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet24']	= { img : "/imperium/images/planet_card_template.png" , name : "Nova Klondike" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet25']	= { img : "/imperium/images/planet_card_template.png" , name : "Contouri I" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet26']	= { img : "/imperium/images/planet_card_template.png" , name : "Contouri II" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet27']	= { img : "/imperium/images/planet_card_template.png" , name : "Hoth" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet28']	= { img : "/imperium/images/planet_card_template.png" , name : "Unsulla" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet29']	= { img : "/imperium/images/planet_card_template.png" , name : "Grox Towers" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet30']	= { img : "/imperium/images/planet_card_template.png" , name : "Gravity's Edge" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet31']	= { img : "/imperium/images/planet_card_template.png" , name : "Populax" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet32']	= { img : "/imperium/images/planet_card_template.png" , name : "Old Moltour" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet33']	= { img : "/imperium/images/planet_card_template.png" , name : "New Illia" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet34']	= { img : "/imperium/images/planet_card_template.png" , name : "Outerant" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet35']	= { img : "/imperium/images/planet_card_template.png" , name : "Vespar" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet36']	= { img : "/imperium/images/planet_card_template.png" , name : "Coruscant" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet37']	= { img : "/imperium/images/planet_card_template.png" , name : "Yssari II" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet38']	= { img : "/imperium/images/planet_card_template.png" , name : "Hope's Lure" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet39']	= { img : "/imperium/images/planet_card_template.png" , name : "Quandam" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet40']	= { img : "/imperium/images/planet_card_template.png" , name : "Quandor" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet41']	= { img : "/imperium/images/planet_card_template.png" , name : "Lorstruck" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet42']	= { img : "/imperium/images/planet_card_template.png" , name : "Industryl" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet43']	= { img : "/imperium/images/planet_card_template.png" , name : "Mechanex" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet44']	= { img : "/imperium/images/planet_card_template.png" , name : "New Rome" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet45']	= { img : "/imperium/images/planet_card_template.png" , name : "Incarth" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
+  planets['planet46']	= { img : "/imperium/images/planet_card_template.png" , name : "Aandor" , resources : 3 , influence : 2 , bonus : "" , top : 10 , left : 10 }
 
 
 
@@ -3439,9 +3513,8 @@ Imperium.prototype.endGame = function endGame(winner, method) {
 
 
 
-Imperium.prototype.returnPlanetCard = function returnPlanetCard(planetname) {
+Imperium.prototype.returnPlanetCard = function returnPlanetCard(planetname="") {
 
-  planetname = "planet1";
   var c = this.game.planets[planetname];
   if (c == undefined) {
 
@@ -3452,7 +3525,13 @@ Imperium.prototype.returnPlanetCard = function returnPlanetCard(planetname) {
 
   }
 
-  var html = `<img class="cardimg" src="${c.img}" />`;
+  var html = `
+    <div class="planetcard" style="background-image: url('${c.img}');">
+      <div class="planetcard_name">${c.name}</div>
+      <div class="planetcard_resources">${c.resources}</div>
+      <div class="planetcard_influence">${c.influence}</div>
+    </div>
+  `;
   return html;
 
 }
