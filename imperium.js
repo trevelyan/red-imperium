@@ -24,7 +24,7 @@ function Imperium(app) {
   // HUD
   //
   this.useHUD = 1;
-  this.addHUDMenu      = ['Planets','Tech'];
+  this.addHUDMenu      = ['Planets','Tech','Trade'];
 
 
   //
@@ -70,6 +70,9 @@ Imperium.prototype.triggerHUDMenu = function triggerHUDMenu(menuitem) {
       break;
     case "tech":
       this.handleTechMenuItem();
+      break;
+    case "trade":
+      this.handleTradeMenuItem();
       break;
     default:
       break;
@@ -129,7 +132,7 @@ Imperium.prototype.handleTechMenuItem = function handleTechMenuItem() {
   `
     <div id="menu-container">
       <div style="margin-bottom: 1em">
-        Faction Technologies:
+        The Technological Empires:
       </div>
       <ul>
    `;
@@ -154,6 +157,49 @@ Imperium.prototype.handleTechMenuItem = function handleTechMenuItem() {
     for (let z = 0; z < tech.length; z++) {
       html += '<li class="cardchoice" id="">' + tech[z] + '</li>';
     }
+    html += '</ul>';
+
+    $('.hud_menu_overlay').html(html);
+
+  });
+}
+
+
+
+
+Imperium.prototype.handleTradeMenuItem = function handleTradeMenuItem() {
+
+  let imperium_self = this;
+  let factions = this.returnFactions();
+  let html =
+  `
+    <div id="menu-container">
+      <div style="margin-bottom: 1em">
+        The Commercial Empires:
+      </div>
+      <ul>
+   `;
+  for (let i = 0; i < this.game.players.length; i++) {
+  html += `  <li class="card" id="${i}">${factions[this.game.players[i].faction].name}</li>`;
+  }
+  html += `
+      </ul>
+    </div>
+  `
+  $('.hud_menu_overlay').html(html);
+
+  //
+  // leave action enabled on other panels
+  //
+  $('.card').on('click', function() {
+
+    let p = $(this).attr("id");
+    let commodities_total = imperium_self.game.players[p].commodities;
+    let goods_total = imperium_self.game.players[p].goods;
+
+    let html  = "Total Faction Resources: <p></p><ul>";
+    html += '<li>' + commodities_total + " commodities" + '</li>';
+    html += '<li>' + goods_total + " goods" + '</li>'
     html += '</ul>';
 
     $('.hud_menu_overlay').html(html);
