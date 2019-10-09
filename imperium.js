@@ -60,9 +60,9 @@ util.inherits(Imperium, Game);
 
 
 
-
-
-
+/////////////////
+/// HUD MENUS ///
+/////////////////
 Imperium.prototype.triggerHUDMenu = function triggerHUDMenu(menuitem) {
   switch (menuitem) {
     case "planets":
@@ -78,8 +78,6 @@ Imperium.prototype.triggerHUDMenu = function triggerHUDMenu(menuitem) {
       break;
   }
 }
-
-
 
 Imperium.prototype.handlePlanetsMenuItem = function handlePlanetsMenuItem() {
 
@@ -122,8 +120,6 @@ Imperium.prototype.handlePlanetsMenuItem = function handlePlanetsMenuItem() {
 
 }
 
-
-
 Imperium.prototype.handleTechMenuItem = function handleTechMenuItem() {
 
   let imperium_self = this;
@@ -164,9 +160,6 @@ Imperium.prototype.handleTechMenuItem = function handleTechMenuItem() {
   });
 }
 
-
-
-
 Imperium.prototype.handleTradeMenuItem = function handleTradeMenuItem() {
 
   let imperium_self = this;
@@ -206,18 +199,6 @@ Imperium.prototype.handleTradeMenuItem = function handleTradeMenuItem() {
 
   });
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -291,8 +272,7 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
     //
     // empty space in board center
     //
-    this.game.board["4_4"].tile = "sector1";
-
+    this.game.board["4_4"].tile = "sector25";
 
     for (let i in this.game.board) {
       if (i != "4_4" && !hwsectors.includes(i)) {
@@ -301,9 +281,9 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
         while (oksel == 0) {
           let rp = keys[Math.floor(keys.length * Math.random())];
 //          if (this.game.systems[rp].hw != 1 && seltil.includes(rp) != 1 && this.game.systems[rp].mr != 1) {
-          if (this.game.systems[rp].hw != 1 && this.game.systems[rp].mr != 1) {
+          if (this.game.systems[rp].hw > -1 && seltil.includes(rp) != 1 && this.game.systems[rp].mr != 1) {
             seltil.push(rp);
-//            delete tmp_sys[rp];
+            delete tmp_sys[rp];
             this.game.board[i].tile = rp;
             oksel = 1;
           }
@@ -347,11 +327,8 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
         this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "spacedock");
 
 	this.saveSystemAndPlanets(sys);
-
       }
     }
-
-
   }
 
 
@@ -431,6 +408,11 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
   this.addEventsToBoard();
 
 }
+
+
+
+
+
 
 
 /////////////////////
@@ -1339,18 +1321,18 @@ Imperium.prototype.playerTrade = function playerTrade(mycallback) {
       if (selected == "goods") { goods_selected++; }
       if (selected == "confirm") {
 	if (commodities_selected >= 1) {
-	  imperium_self.addMove("trade\t"+this.game.player+"\t"+(faction+1)+"commodities"+"\t"+commodities_selected);
+	  imperium_self.addMove("trade\t"+imperium_self.game.player+"\t"+(faction+1)+"commodities"+"\t"+commodities_selected);
 	}
 	if (goods_selected >= 1) {
-	  imperium_self.addMove("trade\t"+this.game.player+"\t"+(faction+1)+"goods"+"\t"+goods_selected);
+	  imperium_self.addMove("trade\t"+imperium_self.game.player+"\t"+(faction+1)+"goods"+"\t"+goods_selected);
 	}
       }
 
-      if (commodities_selected > this.game.players[this.game.player-1].commodities) {
-	commodities_selected = this.game.players[this.game.player-1].commodities;
+      if (commodities_selected > imperium_self.game.players[imperium_self.game.player-1].commodities) {
+	commodities_selected = imperium_self.game.players[imperium_self.game.player-1].commodities;
       }
-      if (goods_selected > this.game.players[this.game.player-1].goods) {
-	goods_selected = this.game.players[this.game.player-1].goods;
+      if (goods_selected > imperium_self.game.players[imperium_self.game.player-1].goods) {
+	goods_selected = imperium_self.game.players[imperium_self.game.player-1].goods;
       }
 
       $('.commodities_total').html(commodities_selected);
@@ -3007,7 +2989,7 @@ Imperium.prototype.returnPlanets = function returnPlanets() {
   planets['planet33']	= { img : "/imperium/images/planet_card_template.png" , name : "New Illia" , resources : 3 , influence : 2 , bonus : ""  }
   planets['planet34']	= { img : "/imperium/images/planet_card_template.png" , name : "Outerant" , resources : 3 , influence : 2 , bonus : ""  }
   planets['planet35']	= { img : "/imperium/images/planet_card_template.png" , name : "Vespar" , resources : 3 , influence : 2 , bonus : ""  }
-  planets['planet36']	= { img : "/imperium/images/planet_card_template.png" , name : "Coruscant" , resources : 3 , influence : 2 , bonus : ""  }
+  planets['planet36']	= { img : "/imperium/images/planet_card_template.png" , name : "Craw Populi" , resources : 3 , influence : 2 , bonus : ""  }
   planets['planet37']	= { img : "/imperium/images/planet_card_template.png" , name : "Yssari II" , resources : 3 , influence : 2 , bonus : ""  }
   planets['planet38']	= { img : "/imperium/images/planet_card_template.png" , name : "Hope's Lure" , resources : 3 , influence : 2 , bonus : ""  }
   planets['planet39']	= { img : "/imperium/images/planet_card_template.png" , name : "Quandam" , resources : 3 , influence : 2 , bonus : ""  }
@@ -3015,10 +2997,9 @@ Imperium.prototype.returnPlanets = function returnPlanets() {
   planets['planet41']	= { img : "/imperium/images/planet_card_template.png" , name : "Lorstruck" , resources : 3 , influence : 2 , bonus : ""  }
   planets['planet42']	= { img : "/imperium/images/planet_card_template.png" , name : "Industryl" , resources : 3 , influence : 2 , bonus : ""  }
   planets['planet43']	= { img : "/imperium/images/planet_card_template.png" , name : "Mechanex" , resources : 3 , influence : 2 , bonus : ""  }
-  planets['planet44']	= { img : "/imperium/images/planet_card_template.png" , name : "New Rome" , resources : 3 , influence : 2 , bonus : ""  }
+  planets['planet44']	= { img : "/imperium/images/planet_card_template.png" , name : "Hearthslough" , resources : 3 , influence : 2 , bonus : ""  }
   planets['planet45']	= { img : "/imperium/images/planet_card_template.png" , name : "Incarth" , resources : 3 , influence : 2 , bonus : ""  }
   planets['planet46']	= { img : "/imperium/images/planet_card_template.png" , name : "Aandor" , resources : 3 , influence : 2 , bonus : ""  }
-
 
   for (var i in planets) {
     planets[i].exhausted = 0;
@@ -3081,25 +3062,18 @@ Imperium.prototype.returnSystems = function returnSystems() {
   systems['sector22']        = { img : "/imperium/images/sector22.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet29'] }
   systems['sector23']        = { img : "/imperium/images/sector23.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet30'] }
   systems['sector24']        = { img : "/imperium/images/sector24.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet31'] }
-  systems['sector25']        = { img : "/imperium/images/sector25.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet32'] }
+  systems['sector25']        = { img : "/imperium/images/sector25.png" , 	   name : "" , hw : 0 , mr : 1 , planets : ['planet32'] }
   systems['sector26']        = { img : "/imperium/images/sector26.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet33'] }
   systems['sector27']        = { img : "/imperium/images/sector27.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet34'] }
   systems['sector28']        = { img : "/imperium/images/sector28.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet35'] }
   systems['sector29']        = { img : "/imperium/images/sector29.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet36'] }
-  systems['sector30']        = { img : "/imperium/images/sector30.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet37'] }
-  systems['sector31']        = { img : "/imperium/images/sector31.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet38'] }
-  systems['sector32']        = { img : "/imperium/images/sector32.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet39'] }
+  systems['sector30']        = { img : "/imperium/images/sector30.png" , 	   name : "" , hw : 1 , mr : 0 , planets : ['planet37'] }
+  systems['sector31']        = { img : "/imperium/images/sector31.png" , 	   name : "" , hw : 1 , mr : 0 , planets : ['planet38'] }
+  systems['sector32']        = { img : "/imperium/images/sector32.png" , 	   name : "" , hw : 1 , mr : 0 , planets : ['planet39'] }
   systems['sector33']        = { img : "/imperium/images/sector33.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
   systems['sector34']        = { img : "/imperium/images/sector34.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
   systems['sector35']        = { img : "/imperium/images/sector35.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
   systems['sector36']        = { img : "/imperium/images/sector36.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-
-//  systems['sector37']        = { img : "/imperium/images/sector37.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-//  systems['sector38']        = { img : "/imperium/images/sector38.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-//  systems['sector39']        = { img : "/imperium/images/sector39.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-//  systems['sector40']        = { img : "/imperium/images/sector40.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-//  systems['sector41']        = { img : "/imperium/images/sector41.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-//  systems['sector42']        = { img : "/imperium/images/sector42.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
 
   for (var i in systems) {
     systems[i].units = [this.totalPlayers]; // array to store units
@@ -3706,6 +3680,13 @@ Imperium.prototype.returnPlayers = function returnPlayers(num=0) {
 
   for (let i = 0; i < num; i++) {
 
+    if (i == 0) { col = "color1"; }
+    if (i == 1) { col = "color2"; }
+    if (i == 2) { col = "color3"; }
+    if (i == 3) { col = "color4"; }
+    if (i == 4) { col = "color5"; }
+    if (i == 5) { col = "color6"; }
+
     var keys = Object.keys(factions);
     let rf = keys[this.rollDice(keys.length)-1];
     delete factions[rf];
@@ -3716,13 +3697,12 @@ Imperium.prototype.returnPlayers = function returnPlayers(num=0) {
     players[i].fleet_supply    	= 3;
     players[i].faction 		= rf;
     players[i].homeworld	= "";
-    players[i].color   		= "red";
+    players[i].color   		= col;
     players[i].goods		= 0;
-    players[i].commodities	= 0;
+    players[i].commodities	= 3;
     players[i].commodity_limit	= 3;
 
     players[i].passed		= 0;
-    players[i].can_trade_this_turn = 0;
 
     if (i == 1) { players[i].color   = "yellow"; }
     if (i == 2) { players[i].color   = "green"; }
@@ -4050,34 +4030,37 @@ Imperium.prototype.updateSectorGraphics = function updateSectorGraphics(sector) 
       ////////////////////
       html = '<div class="fleet">';
 
+      let fleet_color = "color"+player;
+      
+
       // fighters
       html += '<div class="fighters" alt="'+fighters+'">';
-      if (fighters > 0) { html += '<div class="fighter">'+fighters+'</div>'; }
+      if (fighters > 0) { html += `<div class="fighter ${fleet_color}">`+fighters+`</div>`; }
       html += '</div>';
 
       // carriers
       html += '<div class="carriers" alt="'+carriers+'">';
-      if (carriers > 0) { html += '<div class="carrier">'+carriers+'</div>'; }
+      if (carriers > 0) { html += `<div class="carrier ${fleet_color}">`+carriers+`</div>`; }
       html += '</div>';
 
       // destroyers
       html += '<div class="destroyers" alt="'+destroyers+'">';
-      if (destroyers > 0) { html += '<div class="destroyer">'+destroyers+'</div>'; }
+      if (destroyers > 0) { html += `<div class="destroyer ${fleet_color}">`+destroyers+`</div>`; }
       html += '</div>';
 
       // cruisers
       html += '<div class="cruisers" alt="'+cruisers+'">';
-      if (cruisers > 0) { html += '<div class="cruiser">'+cruisers+'</div>'; }
+      if (cruisers > 0) { html += `<div class="cruiser ${fleet_color}">`+cruisers+`</div>`; }
       html += '</div>';
 
       // dreadnaught
       html += '<div class="dreadnaughts" alt="'+dreadnaughts+'">';
-      if (dreadnaughts > 0) { html += '<div class="dreadnaught">'+dreadnaughts+'</div>'; }
+      if (dreadnaughts > 0) { html += `<div class="dreadnaught ${fleet_color}">`+dreadnaughts+`</div>`; }
       html += '</div>';
 
       // flagships
       html += '<div class="flagships" alt="'+flagships+'">';
-      if (flagships > 0) { html += '<div class="flagship">'+flagships+'</div>'; }
+      if (flagships > 0) { html += `<div class="flagship ${fleet_color}">`+flagships+`</div>`; }
       html += '</div>';
 
       html += '</div>';

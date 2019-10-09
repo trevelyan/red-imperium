@@ -39,6 +39,26 @@ body {
 }
 
 
+.color1 {
+  background-color: #14ff2d;
+}
+.color2 {
+  background-color: #4614ff;
+}
+.color3 {
+  background-color: #ff1414;
+}
+.color4 {
+  background-color: #a714ff;
+}
+.color5 {
+  background-color: #144dff;
+}
+.color6 {
+  background-color: #f2ff14;
+}
+
+
 
 
 
@@ -177,7 +197,7 @@ body {
   position: relative;
 }
 .fighter {
-  background-color: white;
+  #background-color: white;
   width: 20px;
   height: 20px;
   padding: 3px;
@@ -186,7 +206,7 @@ body {
   margin-top: 10px;
 }
 .destroyer {
-  background-color: white;
+  #background-color: white;
   width: 20px;
   height: 40px;
   padding: 3px;
@@ -195,7 +215,7 @@ body {
   margin-top: 10px;
 }
 .carrier {
-  background-color: white;
+  #background-color: white;
   width: 90px;
   height: 20px;
   padding: 3px;
@@ -204,7 +224,7 @@ body {
   margin-top: 10px;
 }
 .cruiser {
-  background-color: white;
+  #background-color: white;
   width: 120px;
   height: 35px;
   padding: 3px;
@@ -213,7 +233,7 @@ body {
   margin-top: 10px;
 }
 .dreadnaught {
-  background-color: white;
+  #background-color: white;
   width: 120px;
   height: 55px;
   padding: 3px;
@@ -222,7 +242,7 @@ body {
   margin-top: 10px;
 }
 .flagship {
-  background-color: white;
+  #background-color: white;
   width: 140px;
   height: 60px;
   padding: 3px;
