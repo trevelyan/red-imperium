@@ -4,6 +4,32 @@
 }
 
 
+
+
+.leaderboardbox {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300px;
+}
+.leaderboard {
+  height: 280px;
+  width: 100%;
+  background-color: lightyellow;
+}
+.agendabox {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+.agendas {
+  float:right;
+  height: 180px;
+  width: 600px;
+  background-color: lightyellow;
+}
+
 .option {
  cursor:pointer;
 }
@@ -32,8 +58,8 @@ body {
 .gameboard {
   position: absolute;
   background-size: cover;
-  width: 5100px;
-  height: 3300px;
+  /* width: 5100px; */
+  /* height: 3300px; */
   /* width: 2550px; */
   /* height: 1650px; */
 }
@@ -343,6 +369,26 @@ body {
  background-size: cover;
 }
 .actioncard_name {
+ position: relative;
+ top: 6%;
+ font-weight: bold;
+ text-align: center;
+ width: inherit;
+ margin-left: auto;
+ margin-right: auto;
+}
+
+.agendacard {
+ width: 180px;
+ height: 252px;
+ position: relative;
+ background-size: cover;
+ float: right;
+ border: 2px solid white;
+ margin-left: 10px;
+}
+.agendacard_name {
+ color: white;
  position: relative;
  top: 6%;
  font-weight: bold;

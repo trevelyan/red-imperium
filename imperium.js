@@ -24,14 +24,15 @@ function Imperium(app) {
   // HUD
   //
   this.useHUD = 1;
-  this.addHUDMenu      = ['Planets','Tech','Trade'];
+  this.addHUDMenu      = ['Planets','Tech','Trade','Laws'];
 
 
   //
   // this sets the ratio used for determining
   // the size of the original pieces
   //
-  this.gameboardWidth  = 2677;
+  //this.gameboardWidth  = 2677;
+  this.gameboardWidth  = 1900;
 
   this.moves           = [];
   this.rmoves          = [];
@@ -73,6 +74,9 @@ Imperium.prototype.triggerHUDMenu = function triggerHUDMenu(menuitem) {
       break;
     case "trade":
       this.handleTradeMenuItem();
+      break;
+    case "laws":
+      this.handleLawsMenuItem();
       break;
     default:
       break;
@@ -189,15 +193,58 @@ Imperium.prototype.handleTradeMenuItem = function handleTradeMenuItem() {
     let p = $(this).attr("id");
     let commodities_total = imperium_self.game.players[p].commodities;
     let goods_total = imperium_self.game.players[p].goods;
+    let fleet_total = imperium_self.game.players[p].fleet_supply;
+    let command_total = imperium_self.game.players[p].command_tokens;
+    let strategy_total = imperium_self.game.players[p].strategy_tokens;
 
     let html  = "Total Faction Resources: <p></p><ul>";
     html += '<li>' + commodities_total + " commodities" + '</li>';
     html += '<li>' + goods_total + " goods" + '</li>'
+    html += '<li>' + command_total + " command tokens" + '</li>'
+    html += '<li>' + strategy_total + " strategy tokens" + '</li>'
+    html += '<li>' + fleet_total + " fleet supply" + '</li>'
     html += '</ul>';
 
     $('.hud_menu_overlay').html(html);
 
   });
+}
+
+
+
+Imperium.prototype.handleLawsMenuItem = function handleLawsMenuItem() {
+
+  let imperium_self = this;
+  let laws = this.returnAgendaCards();
+  let html = '<div id="menu-container">';
+
+  if (this.game.state.agendas.length > 0) {
+    html += '<div style="margin-bottom: 1em">Galactic Laws Under Enforcement:</div>';
+    html += '<ul>';
+    for (let i = 0; i < this.game.state.laws.length; i++) {
+      html += `  <li class="card" id="${i}">${laws[this.game.state.laws[i]].name}</li>`;
+    }
+    html += '</ul>';
+    html += '<p></p>';
+  }
+
+  if (this.game.state.laws.length > 0) {
+    html += '<div style="margin-bottom: 1em">Galactic Laws Under Consideration:</div>';
+    html += '<ul>';
+    for (let i = 0; i < this.game.state.agendas.length; i++) {
+      html += `  <li class="card" id="${i}">${laws[this.game.state.agendas[i]].name}</li>`;
+    }
+    html += '</ul>';
+  }
+
+  if (this.game.state.laws.length == 0 && this.game.state.agendas.length == 0) {
+    html += 'There are no laws in force or agendas up for consideration at this time.';
+  }
+
+  html += '</div>';
+
+  $('.hud_menu_overlay').html(html);
+
 }
 
 
@@ -219,6 +266,13 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
   //
   // this.totalPlayers = this.game.opponents.length + 1;
   this.totalPlayers = 3;
+
+  //
+  // position non-hex pieces
+  //
+  $('.agendabox').css('width', this.gameboardWidth);
+
+
 
 
   //
@@ -250,6 +304,10 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
     this.game.tech    = this.returnTechnologyTree();
     this.game.players = this.returnPlayers(this.totalPlayers); // factions and player info
     this.game.state   = this.returnState();
+    this.game.state.strategy_cards = [];
+    let x = this.returnStrategyCards();
+    for (let i in x) { this.game.state.strategy_cards.push(i); this.game.state.strategy_cards_bonus.push(0); }
+
 
     //
     // put homeworlds on board
@@ -259,6 +317,31 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
     for (let i = 0; i < this.game.players.length; i++) {
       this.game.players[i].homeworld = hwsectors[i];
       this.game.board[hwsectors[i]].tile = factions[this.game.players[i].faction].homeworld;
+    }
+
+
+    //
+    // remove tiles in 3 player game
+    //
+    if (this.totalPlayers == 3) {
+      $('#1_3').attr('id', '');
+      delete this.game.board["1_3"];
+      $('#1_4').attr('id', '');
+      delete this.game.board["1_4"];
+      $('#2_5').attr('id', '');
+      delete this.game.board["2_5"];
+      $('#3_1').attr('id', '');
+      delete this.game.board["3_1"];
+      $('#4_1').attr('id', '');
+      delete this.game.board["4_1"];
+      $('#5_1').attr('id', '');
+      delete this.game.board["5_1"];
+      $('#6_5').attr('id', '');
+      delete this.game.board["6_5"];
+      $('#7_3').attr('id', '');
+      delete this.game.board["7_3"];
+      $('#7_4').attr('id', '');
+      delete this.game.board["7_4"];
     }
 
 
@@ -334,32 +417,6 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
 
 
   //
-  // remove tiles in 3 player game
-  //
-  if (this.totalPlayers == 3) {
-    $('#1_3').attr('id', '');
-    delete this.game.board["1_3"];
-    $('#1_4').attr('id', '');
-    delete this.game.board["1_4"];
-    $('#2_5').attr('id', '');
-    delete this.game.board["2_5"];
-    $('#3_1').attr('id', '');
-    delete this.game.board["3_1"];
-    $('#4_1').attr('id', '');
-    delete this.game.board["4_1"];
-    $('#5_1').attr('id', '');
-    delete this.game.board["5_1"];
-    $('#6_5').attr('id', '');
-    delete this.game.board["6_5"];
-    $('#7_3').attr('id', '');
-    delete this.game.board["7_3"];
-    $('#7_4').attr('id', '');
-    delete this.game.board["7_4"];
-  }
-
-
-
-  //
   // display board
   //
   for (let i in this.game.board) {
@@ -379,9 +436,13 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
   //
   // initialize game queue
   //
-  if (this.game.queue.length == 0) {
+  if (1) {
+     this.game.queue = [];
+
+//  if (this.game.queue.length == 0) {
 
     this.game.queue.push("turn");
+    this.game.queue.push("newround");
 
     //
     // add cards to deck and shuffle as needed
@@ -461,49 +522,96 @@ Imperium.prototype.handleGame = function handleGame(msg=null) {
 
       if (mv[0] === "turn") {
 
+	this.game.state.turn++;
+
 	this.game.queue.push("play\t1");
 
 	let new_round = 1;
         for (let i = 0; i < this.game.players.length; i++) {
-	  if (this.game.players[i].passed == 0) { new_round = 0; }
+//
+//
+//	  if (this.game.players[i].passed == 0) { new_round = 0; }
+	  if (this.game.players[this.game.player-1].passed == 0) { new_round = 0; }
         }
 
 	//
 	// NEW TURN
 	//
 	if (new_round == 1) {
-
-	  //
-	  // SCORING
-	  //
-          if (this.game.state.round_scoring == 0) {
-	    alert("handling scoring that did not happen");
-		// we can handle this by triggering the secondary of the Empire card directly
-	  } else {
-	    this.game.state.round_scoring = 0;
-	  }
-
-
-	  //
-	  // RESET USER ACCOUNTS
-	  //
-          for (let i = 0; i < this.game.players.length; i++) {
-	    this.game.players[i].passed = 0;
-          }
-
-	  //
-	  // REPAIR UNITS
-	  //
-	  
-	  //
-	  // FLIP NEW AGENDA CARDS
-	  //
-          this.game.queue.push("FLIPCARD\t3\t2\t1\t1");	// deck card poolnum player
-
+console.log("\n\nNEW ROUND");
+	  this.game.queue.push("newround");
 	}
 
-console.log(JSON.stringify(this.game.queue));
+	this.updateLeaderboard();
 
+      }
+
+      if (mv[0] === "newround") {
+
+	this.game.queue.push("resolve\tnewround");
+
+	this.game.state.round++;
+
+	//
+	// SCORING
+	//
+        if (this.game.state.round_scoring == 0 && this.game.state.round > 1) {
+          //imperium_self.addMove("strategy\t"+"empire"+"\t"+"-1"+"\t2\t"+this.game.players.length);
+          this.game.queue.push("strategy\t"+"empire"+"\t"+"-1"+"\t2\t"+1);
+	  this.game.state.round_scoring = 0;
+	} else {
+	  this.game.state.round_scoring = 0;
+	}
+
+	//
+	// RESET USER ACCOUNTS
+	//
+        for (let i = 0; i < this.game.players.length; i++) {
+	  this.game.players[i].passed = 0;
+	  this.game.players[i].strategy_cards_played = 0;
+        }
+
+	//
+	// REPAIR UNITS
+	//
+	this.repairUnits();
+
+	//
+	// STRATEGY CARDS
+	//
+        this.game.queue.push("playerschoosestrategycards");
+	  
+	//
+	// FLIP NEW AGENDA CARDS
+	//
+        this.game.queue.push("revealagendas");
+        this.game.queue.push("FLIPCARD\t3\t3\t1\t1");	// deck card poolnum player
+
+	return 1;
+
+      }
+
+      if (mv[0] === "revealagendas") {
+
+	//
+	// reset agendas
+	//
+	this.game.state.agendas = [];
+        for (i = 0; i < 3; i++) {
+          this.game.state.agendas.push(this.game.pool[0].hand[i]);	
+	}
+
+	//
+	// reset pool
+	//
+	this.game.pool = [];
+
+
+	this.updateAgendaDisplay();
+	this.updateLeaderboard();
+
+	this.game.queue.splice(qe, 1);
+	return 1;
       }
 
       if (mv[0] === "invade_planet") {
@@ -542,6 +650,56 @@ console.log(JSON.stringify(this.game.queue));
 
 	this.game.queue.splice(qe-1, 2);
 	return 1;
+      }
+
+
+      if (mv[0] === "playerschoosestrategycards") {
+
+	let speaker 	 = this.game.state.speaker;
+
+	//
+	// all strategy cards on table again
+	//
+	this.game.state.strategy_cards = [];
+	let x = this.returnStrategyCards();
+
+	for (let z in x) {
+  	  if (!this.game.state.strategy_cards.includes(z)) {
+	    this.game.state.strategy_cards.push(z);
+	    this.game.state.strategy_cards_bonus.push(0);
+          }
+	}
+
+	if (this.game.player == speaker) {
+
+	  this.addMove("resolve\tplayerschoosestrategycards");
+
+          for (let i = 0; i < this.game.players.length; i++) {
+	    let this_player = speaker+i;
+	    if (this_player > this.game.players.length) { this_player -= this.game.players.length; }
+	    this.rmoves.push("pickstrategy\t"+this_player);
+          }
+
+
+	  this.endTurn();
+	}
+	return 0;
+      }
+
+      if (mv[0] === "pickstrategy") {
+
+	let player       = parseInt(mv[1]);
+
+	if (this.game.player == player) {
+
+	  this.playerSelectStrategyCards(function(card) {
+	    imperium_self.addMove("resolve\tpickstrategy");
+	    imperium_self.addMove("purchase\t"+this.game.player+"\tstrategy\t"+card);
+	    imperium_self.endTurn();
+	  });
+	  return 0;
+	}
+	return 0;
       }
 
       if (mv[0] === "land") {
@@ -717,6 +875,17 @@ console.log(JSON.stringify(this.game.queue));
         let item         = mv[2];
         let amount       = parseInt(mv[3]);
 
+        if (item == "strategy") {
+	  this.game.players[player-1].strategy.push(mv[3]);
+	  for (let i = 0; i < this.game.state.strategy_cards.length; i++) {
+	    if (this.game.state.strategy_cards[i] === mv[3]) {
+	      this.game.players[player-1].goods += this.game.state.strategy_cards_bonus[i];
+	      this.game.state.strategy_cards.splice(i, 1);
+	      this.game.state.strategy_cards_bonus.splice(i, 1);
+	      i = this.game.state.strategy_cards.length+2;
+	    }
+	  }
+	}
         if (item == "tech") {
 	  this.game.players[player-1].tech.push(mv[3]);
 	}
@@ -846,8 +1015,6 @@ console.log(JSON.stringify(this.game.queue));
       }
       if (mv[0] === "play") {
 
-console.log("CARDS IN POOL 1: " + JSON.stringify(this.game.pool));
-
 	let player = mv[1];
         if (player == this.game.player) {
 	  this.tracker = this.returnPlayerTurnTracker();
@@ -896,18 +1063,22 @@ Imperium.prototype.playerTurn = function playerTurn(stage="main") {
 
   if (stage == "main") {
 
-    let html  = this.returnFaction(this.game.player) + ": <p></p><ul>";
-    if (this.tracker.activate_system == 0) {
+    let html  = '[command: '+this.game.players[this.game.player-1].command_tokens+'] [strategy: '+this.game.players[this.game.player-1].strategy_tokens+']';
+        html  += '<p></p>';
+        html  += this.returnFaction(this.game.player) + ": <p></p><ul>";
+    if (this.game.players[this.game.player-1].command_tokens > 0) {
       html += '<li class="option" id="activate">activate system</li>';
     }
-    html += '<li class="option" id="select_strategy_card">select strategy card</li>';
+// HACK
+    if (this.game.players[this.game.player-1].command_tokens > 0) {
+      html += '<li class="option" id="select_strategy_card">select strategy card</li>';
+    }
     if (this.tracker.action_card == 0) {
       html += '<li class="option" id="action">action card</li>';
     }
     if (this.tracker.trade == 0) {
       html += '<li class="option" id="trade">trade</li>';
     }
-
 
     html += '<li class="option" id="pass">pass</li>';
     html += '</ul>';
@@ -939,7 +1110,6 @@ Imperium.prototype.playerTurn = function playerTurn(stage="main") {
         });
       }
       if (action2 == "pass") {
-        imperium_self.addMove("resolve\tplay");
         imperium_self.addMove("pass\t"+imperium_self.game.player);
         imperium_self.endTurn();
       }
@@ -1512,11 +1682,29 @@ Imperium.prototype.playerSelectActionCard = function playerSelectActionCard(myca
 
 Imperium.prototype.playerSelectStrategyCard = function playerSelectStrategyCard(mycallback) {
 
-  let array_of_cards = this.returnStrategyCards();
+  let array_of_cards = this.game.players[this.game.player-1].strategy;
 
   let html  = "Select strategy card: <p></p><ul>";
   for (let z in array_of_cards) {
     html += '<li class="cardchoice" id="'+z+'">' + this.returnStrategyCard(z) + '</li>';
+  }
+  html += '</ul>';
+
+  this.updateStatus(html);
+  $('.cardchoice').on('click', function() {
+    let action2 = $(this).attr("id");
+    mycallback(action2);
+  });
+
+}
+
+
+
+Imperium.prototype.playerSelectStrategyCards = function playerSelectStrategyCards(mycallback) {
+
+  let html  = "Select strategy card: <p></p><ul>";
+  for (let z = 0; z < this.game.state.strategy_cards.length; z++) {
+    html += '<li class="cardchoice" id="'+this.game.state.strategy_cards[z]+'">' + this.returnStrategyCard(this.game.state.strategy_cards[z]) + '</li>';
   }
   html += '</ul>';
 
@@ -1956,6 +2144,7 @@ Imperium.prototype.playerActivateSystem = function playerActivateSystem() {
         sys.s.activated[imperium_self.game.player-1] = 1;
         imperium_self.addMove("resolve\tplay");
         imperium_self.addMove("activate\t"+imperium_self.game.player+"\t"+pid);
+        imperium_self.addMove("expend\t"+imperium_self.game.player+"\t"+"command"+"\t"+1);
         imperium_self.playerPostActivateSystem(pid);
   //    }
     }
@@ -3024,10 +3213,16 @@ Imperium.prototype.returnState = function returnState() {
 
   let state = {};
 
+      state.speaker = 1;
+      state.round = 0;
+      state.turn = 1;
       state.round_scoring = 0;
-
       state.events = {};
-
+      state.laws = [];
+      state.agendas = [];
+      state.strategy_cards = [];
+      state.strategy_cards_bonus = [];
+    
   return state;
 }
 
@@ -3281,16 +3476,16 @@ Imperium.prototype.returnStageIPublicObjectives = function returnStageIPublicObj
 
   let obj = {};
 
-  obj['1']		= { img : "/imperium/images/card_template1.jpg" }
-  obj['2']		= { img : "/imperium/images/card_template1.jpg" }
-  obj['3']		= { img : "/imperium/images/card_template1.jpg" }
-  obj['4']		= { img : "/imperium/images/card_template1.jpg" }
-  obj['5']		= { img : "/imperium/images/card_template1.jpg" }
-  obj['6']		= { img : "/imperium/images/card_template1.jpg" }
-  obj['7']		= { img : "/imperium/images/card_template1.jpg" }
-  obj['8']		= { img : "/imperium/images/card_template1.jpg" }
-  obj['9']		= { img : "/imperium/images/card_template1.jpg" }
-  obj['10']		= { img : "/imperium/images/card_template1.jpg" }
+  obj['1']		= { img : "/imperium/images/objective_card_1_template.png" }
+  obj['2']		= { img : "/imperium/images/objective_card_1_template.png" }
+  obj['3']		= { img : "/imperium/images/objective_card_1_template.png" }
+  obj['4']		= { img : "/imperium/images/objective_card_1_template.png" }
+  obj['5']		= { img : "/imperium/images/objective_card_1_template.png" }
+  obj['6']		= { img : "/imperium/images/objective_card_1_template.png" }
+  obj['7']		= { img : "/imperium/images/objective_card_1_template.png" }
+  obj['8']		= { img : "/imperium/images/objective_card_1_template.png" }
+  obj['9']		= { img : "/imperium/images/objective_card_1_template.png" }
+  obj['10']		= { img : "/imperium/images/objective_card_1_template.png" }
 
   return obj;
 
@@ -3305,16 +3500,16 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
 
   let obj = {};
 
-  obj['1']		= { img : "/imperium/images/card_template.jpg" }
-  obj['2']		= { img : "/imperium/images/card_template.jpg" }
-  obj['3']		= { img : "/imperium/images/card_template.jpg" }
-  obj['4']		= { img : "/imperium/images/card_template.jpg" }
-  obj['5']		= { img : "/imperium/images/card_template.jpg" }
-  obj['6']		= { img : "/imperium/images/card_template.jpg" }
-  obj['7']		= { img : "/imperium/images/card_template.jpg" }
-  obj['8']		= { img : "/imperium/images/card_template.jpg" }
-  obj['9']		= { img : "/imperium/images/card_template.jpg" }
-  obj['10']		= { img : "/imperium/images/card_template.jpg" }
+  obj['1']		= { img : "/imperium/images/objective_card_2_template.png" }
+  obj['2']		= { img : "/imperium/images/objective_card_2_template.png" }
+  obj['3']		= { img : "/imperium/images/objective_card_2_template.png" }
+  obj['4']		= { img : "/imperium/images/objective_card_2_template.png" }
+  obj['5']		= { img : "/imperium/images/objective_card_2_template.png" }
+  obj['6']		= { img : "/imperium/images/objective_card_2_template.png" }
+  obj['7']		= { img : "/imperium/images/objective_card_2_template.png" }
+  obj['8']		= { img : "/imperium/images/objective_card_2_template.png" }
+  obj['9']		= { img : "/imperium/images/objective_card_2_template.png" }
+  obj['10']		= { img : "/imperium/images/objective_card_2_template.png" }
 
   return obj;
 
@@ -3511,91 +3706,66 @@ Imperium.prototype.returnActionCards = function returnActionCards() {
 
   let action = {};
 
-  action['1']	= { img : "/imperium/images/card_template.jpg" };
-  action['2']	= { img : "/imperium/images/card_template.jpg" };
-  action['3']	= { img : "/imperium/images/card_template.jpg" };
-  action['4']	= { img : "/imperium/images/card_template.jpg" };
-  action['5']	= { img : "/imperium/images/card_template.jpg" };
-  action['6']	= { img : "/imperium/images/card_template.jpg" };
-  action['7']	= { img : "/imperium/images/card_template.jpg" };
-  action['8']	= { img : "/imperium/images/card_template.jpg" };
-  action['9']	= { img : "/imperium/images/card_template.jpg" };
-  action['10']	= { img : "/imperium/images/card_template.jpg" };
-  action['11']	= { img : "/imperium/images/card_template.jpg" };
-  action['12']	= { img : "/imperium/images/card_template.jpg" };
-  action['13']	= { img : "/imperium/images/card_template.jpg" };
-  action['14']	= { img : "/imperium/images/card_template.jpg" };
-  action['15']	= { img : "/imperium/images/card_template.jpg" };
-  action['16']	= { img : "/imperium/images/card_template.jpg" };
-  action['17']	= { img : "/imperium/images/card_template.jpg" };
-  action['18']	= { img : "/imperium/images/card_template.jpg" };
-  action['19']	= { img : "/imperium/images/card_template.jpg" };
-  action['20']	= { img : "/imperium/images/card_template.jpg" };
-  action['21']	= { img : "/imperium/images/card_template.jpg" };
-  action['22']	= { img : "/imperium/images/card_template.jpg" };
-  action['23']	= { img : "/imperium/images/card_template.jpg" };
-  action['24']	= { img : "/imperium/images/card_template.jpg" };
-  action['25']	= { img : "/imperium/images/card_template.jpg" };
-  action['26']	= { img : "/imperium/images/card_template.jpg" };
-  action['27']	= { img : "/imperium/images/card_template.jpg" };
-  action['28']	= { img : "/imperium/images/card_template.jpg" };
-  action['29']	= { img : "/imperium/images/card_template.jpg" };
-  action['30']	= { img : "/imperium/images/card_template.jpg" };
-  action['31']	= { img : "/imperium/images/card_template.jpg" };
-  action['32']	= { img : "/imperium/images/card_template.jpg" };
-  action['33']	= { img : "/imperium/images/card_template.jpg" };
-  action['34']	= { img : "/imperium/images/card_template.jpg" };
-  action['35']	= { img : "/imperium/images/card_template.jpg" };
-  action['36']	= { img : "/imperium/images/card_template.jpg" };
-  action['37']	= { img : "/imperium/images/card_template.jpg" };
-  action['38']	= { img : "/imperium/images/card_template.jpg" };
-  action['39']	= { img : "/imperium/images/card_template.jpg" };
-  action['40']	= { img : "/imperium/images/card_template.jpg" };
-  action['41']	= { img : "/imperium/images/card_template.jpg" };
-  action['42']	= { img : "/imperium/images/card_template.jpg" };
-  action['43']	= { img : "/imperium/images/card_template.jpg" };
-  action['44']	= { img : "/imperium/images/card_template.jpg" };
-  action['45']	= { img : "/imperium/images/card_template.jpg" };
-  action['46']	= { img : "/imperium/images/card_template.jpg" };
-  action['47']	= { img : "/imperium/images/card_template.jpg" };
-  action['48']	= { img : "/imperium/images/card_template.jpg" };
-  action['49']	= { img : "/imperium/images/card_template.jpg" };
-  action['50']	= { img : "/imperium/images/card_template.jpg" };
-  action['51']	= { img : "/imperium/images/card_template.jpg" };
-  action['52']	= { img : "/imperium/images/card_template.jpg" };
-  action['53']	= { img : "/imperium/images/card_template.jpg" };
-  action['54']	= { img : "/imperium/images/card_template.jpg" };
-  action['55']	= { img : "/imperium/images/card_template.jpg" };
-  action['56']	= { img : "/imperium/images/card_template.jpg" };
-  action['57']	= { img : "/imperium/images/card_template.jpg" };
-  action['58']	= { img : "/imperium/images/card_template.jpg" };
-  action['59']	= { img : "/imperium/images/card_template.jpg" };
-  action['60']	= { img : "/imperium/images/card_template.jpg" };
-  action['61']	= { img : "/imperium/images/card_template.jpg" };
-  action['62']	= { img : "/imperium/images/card_template.jpg" };
-  action['63']	= { img : "/imperium/images/card_template.jpg" };
-  action['64']	= { img : "/imperium/images/card_template.jpg" };
-  action['65']	= { img : "/imperium/images/card_template.jpg" };
-  action['66']	= { img : "/imperium/images/card_template.jpg" };
-  action['67']	= { img : "/imperium/images/card_template.jpg" };
-  action['68']	= { img : "/imperium/images/card_template.jpg" };
-  action['69']	= { img : "/imperium/images/card_template.jpg" };
-  action['70']	= { img : "/imperium/images/card_template.jpg" };
-  action['71']	= { img : "/imperium/images/card_template.jpg" };
-  action['72']	= { img : "/imperium/images/card_template.jpg" };
-  action['73']	= { img : "/imperium/images/card_template.jpg" };
-  action['74']	= { img : "/imperium/images/card_template.jpg" };
-  action['75']	= { img : "/imperium/images/card_template.jpg" };
-  action['76']	= { img : "/imperium/images/card_template.jpg" };
-  action['77']	= { img : "/imperium/images/card_template.jpg" };
-  action['78']	= { img : "/imperium/images/card_template.jpg" };
-  action['79']	= { img : "/imperium/images/card_template.jpg" };
-  action['80']	= { img : "/imperium/images/card_template.jpg" };
-  action['81']	= { img : "/imperium/images/card_template.jpg" };
-  action['82']	= { img : "/imperium/images/card_template.jpg" };
-  action['83']	= { img : "/imperium/images/card_template.jpg" };
-  action['84']	= { img : "/imperium/images/card_template.jpg" };
-  action['85']	= { img : "/imperium/images/card_template.jpg" };
+  action['action1']	= { 
+	name : "Diaspora Uprising" ,
+	type : "instant" ,
+	text : "Gain control of one planet not controlled by any player" ,
+	img : "/imperium/images/action_card_template.png" ,
+  };
+  action['action2']	= { 
+	name : "Hydrocannon Cooling" ,
+	type : "instant" ,
+	text : "Ship gets -2 on combat rolls next round" ,
+	img : "/imperium/images/action_card_template.png" ,
+  };
+  action['action3']	= { 
+	name : "Agile Thrusters" ,
+	type : "instant" ,
+	text : "Attached ship may cancel up to 2 hits by PDS or Ion Cannons" ,
+	img : "/imperium/images/action_card_template.png" ,
+  };
+  action['action4']	= { 
+	name : "" ,
+	type : "instant" ,
+	text : "Exhaust a planet card held by another player. Gain trade goods equal to resource value." ,
+	img : "/imperium/images/action_card_template.png" ,
+  };
+  action['action5']	= { 
+	name : "" ,
+	type : "instant" ,
+	text : "Cancel 1 yellow technology prerequisite" ,
+	img : "/imperium/images/action_card_template.png" ,
+  };
+  action['action6']	= { 
+	name : "" ,
+	type : "instant" ,
+	text : "Cancel 1 blue technology prerequisite" ,
+	img : "/imperium/images/action_card_template.png" ,
+  };
+  action['action7']	= { 
+	name : "" ,
+	type : "instant" ,
+	text : "Cancel 1 red technology prerequisite" ,
+	img : "/imperium/images/action_card_template.png" ,
+  };
+  action['action8']	= { 
+	name : "" ,
+	type : "instant" ,
+	text : "Cancel 1 green technology prerequisite" ,
+	img : "/imperium/images/action_card_template.png" ,
+  };
+  action['action9']	= { 
+	name : "" ,
+	type : "instant" ,
+	text : "Replace 1 of your Destroyers with a Dreadnaught" ,
+	img : "/imperium/images/action_card_template.png" ,
+  };
+  action['action10']	= { 
+	name : "" ,
+	type : "instant" ,
+	text : "Place 1 Destroyer in a system with no existing ships" ,
+	img : "/imperium/images/action_card_template.png" ,
+  };
 
   return action;
 
@@ -3609,56 +3779,54 @@ Imperium.prototype.returnAgendaCards = function returnAgendaCards() {
 
   let agenda = {};
 
-  agenda['1']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['2']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['3']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['4']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['5']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['6']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['7']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['8']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['9']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['10']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['11']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['12']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['13']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['14']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['15']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['16']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['17']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['18']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['19']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['20']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['21']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['22']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['23']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['24']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['25']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['26']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['27']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['28']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['29']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['30']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['31']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['32']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['33']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['34']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['35']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['36']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['37']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['38']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['39']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['40']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['41']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['42']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['43']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['44']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['45']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['46']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['47']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['48']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['49']	= { img : "/imperium/images/card_template.jpg" };
-  agenda['50']	= { img : "/imperium/images/card_template.jpg" };
+  agenda['a1']	= { 
+	name : "Unruly Natives" ,
+	type : "Law" ,
+	text : "All invasions of unoccupied planets require conquering 1 infantry" ,
+	img : "/imperium/images/agenda_card_template.png" ,
+  };
+  agenda['a2']	= { 
+	name : "Wormhole Travel Ban" ,
+	type : "Law" ,
+	text : "All invasions of unoccupied planets require conquering 1 infantry" ,
+	img : "/imperium/images/agenda_card_template.png" ,
+  };
+  agenda['a3']	= { 
+	name : "Regulated Bureaucracy" ,
+	type : "Law" ,
+	text : "Players may have a maximum of 3 action cards in their hands at all times" ,
+	img : "/imperium/images/agenda_card_template.png" ,
+  };
+  agenda['a4']	= { 
+	name : "Freedom in Arms Act" ,
+	type : "Law" ,
+	text : "Players may place any number of PDS units on planets" ,
+	img : "/imperium/images/agenda_card_template.png" ,
+  };
+  agenda['a5']	= { 
+	name : "Performance Testing" ,
+	type : "Law" ,
+	text : "After any player researches a tach, he must destroy a non-fighter ship if possible" ,
+	img : "/imperium/images/agenda_card_template.png" ,
+  };
+  agenda['a6']	= { 
+	name : "Fleet Limitations" ,
+	type : "Law" ,
+	text : "Players may have a maximum of four tokens in their fleet supply." ,
+	img : "/imperium/images/agenda_card_template.png" ,
+  };
+  agenda['a7']	= { 
+	name : "Restricted Conscription" ,
+	type : "Law" ,
+	text : "Production cost for infantry and fighters is 1 rather than 0.5 resources" ,
+	img : "/imperium/images/agenda_card_template.png" ,
+  };
+  agenda['a8']	= { 
+	name : "Representative Democracy" ,
+	type : "Law" ,
+	text : "All players have only 1 vote in each Politics Vote" ,
+	img : "/imperium/images/agenda_card_template.png" ,
+  };
 
   return agenda;
 }
@@ -3668,9 +3836,10 @@ Imperium.prototype.returnAgendaCards = function returnAgendaCards() {
 // Return Factions //
 /////////////////////
 Imperium.prototype.returnFaction = function returnFaction(player) {
+  let factions = this.returnFactions();
   if (this.game.players[player-1] == null) { return "Unknown"; }
   if (this.game.players[player-1] == undefined) { return "Unknown"; }
-  return this.game.players[player-1].faction;
+  return factions[this.game.players[player-1].faction].name;
 }
 
 Imperium.prototype.returnPlayers = function returnPlayers(num=0) {
@@ -3702,7 +3871,9 @@ Imperium.prototype.returnPlayers = function returnPlayers(num=0) {
     players[i].commodities	= 3;
     players[i].commodity_limit	= 3;
 
+    players[i].vp		= 0;
     players[i].passed		= 0;
+    players[i].strategy_cards_played = 0;
 
     if (i == 1) { players[i].color   = "yellow"; }
     if (i == 2) { players[i].color   = "green"; }
@@ -3713,6 +3884,7 @@ Imperium.prototype.returnPlayers = function returnPlayers(num=0) {
     players[i].planets = [];
     players[i].tech = [];
     players[i].upgrades = [];
+    players[i].strategy = [];
 
   }
 
@@ -3856,6 +4028,29 @@ Imperium.prototype.returnPlayerTurnTracker = function returnPlayerTurnTracker() 
 
 
 
+
+Imperium.prototype.repairUnits = function repairUnits() {
+
+  for (let i in this.game.board) {
+    let sys = this.returnSystemAndPlanets(i);
+    for (let i = 0; i < sys.s.units.length; i++) {
+      for (let ii = 0; ii < sys.s.units[i].length; ii++) {
+        sys.s.units[i][ii].strength = sys.s.units[i][ii].max_strength;
+      }
+    }
+    for (let i = 0; i < sys.p.length; i++) {
+      for (let ii = 0; ii < sys.p[i].units; ii++) {
+        for (let iii = 0; iii < sys.p[i].units[ii].length; ii++) {
+          sys.p[i].units[ii][iii].strength = sys.p[i].units[ii][iii].max_strength;
+        }
+      }
+    }
+    this.saveSystemAndPlanets(sys);
+  }
+
+}
+
+
 //////////////////
 // Return Units //
 //////////////////
@@ -3978,13 +4173,45 @@ Imperium.prototype.saveSystemAndPlanets = function saveSystemAndPlanets(sys) {
   for (let key in this.game.systems) {
     if (this.game.systems[key].img == sys.s.img) {
       this.game.systems[key] = sys.s;
-
       for (let j = 0; j < this.game.systems[key].planets.length; j++) {
         this.game.planets[this.game.systems[key].planets[j]] = sys.p[j];
       }
     }
   }
 };
+
+
+Imperium.prototype.updateAgendaDisplay = function updateAgendaDisplay() {
+
+  $('.agendas').empty();
+
+  for (let i = 0; i < this.game.state.agendas.length; i++) {
+    let agendacard = this.returnAgendaCard(this.game.state.agendas[i]);
+    $('.agendas').append(agendacard);
+  }
+
+}
+
+
+Imperium.prototype.updateLeaderboard = function updateLeaderboard() {
+
+  let imperium_self = this;
+  let factions = this.returnFactions();
+  let html = "Round " + this.game.state.round + " (turn " + this.game.state.turn + ")";
+
+      html += '<p></p>';
+      html += '<hr />';
+      html += '<ul>';
+
+  for (let i = 0; i < this.game.players.length; i++) {
+    html += `  <li class="card" id="${i}">${factions[this.game.players[i].faction].name} -- ${this.game.players[i].vp} VP</li>`;
+  }
+
+  html += '</ul>';
+
+  $('.leaderboard').html(html);
+
+}
 
 
 Imperium.prototype.updateSectorGraphics = function updateSectorGraphics(sector) {
@@ -4188,6 +4415,7 @@ Imperium.prototype.endTurn = function endTurn(nextTarget = 0) {
 
   this.game.turn = this.moves;
   this.moves = [];
+  this.rmoves = [];
   this.sendMessage("game", extra);
 };
 
@@ -4311,6 +4539,30 @@ Imperium.prototype.returnActionCard = function returnActionCard(cardname) {
   var html = `
     <div class="actioncard" style="background-image: url('${c.img}');">
       <div class="actioncard_name">${c.name}</div>
+    </div>
+  `;
+  return html;
+
+}
+
+
+Imperium.prototype.returnAgendaCard = function returnAgendaCard(cardname) {
+
+  let cards = this.returnAgendaCards();
+  let c = cards[cardname];
+
+  if (c == undefined) {
+
+    //
+    // this is not a card, it is something like "skip turn" or cancel
+    //
+    return '<div class="noncard">'+cardname+'</div>';
+
+  }
+
+  var html = `
+    <div class="agendacard" style="background-image: url('${c.img}');">
+      <div class="agendacard_name">${c.name}</div>
     </div>
   `;
   return html;
