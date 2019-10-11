@@ -15,6 +15,7 @@ function Imperium(app) {
   this.app             = app;
 
   this.name            = "Imperium";
+  this.description     = `Red Imperium is a multi-player space exploration and conquest simulator. Each player controls a unique faction vying for political control of the galaxy in the waning days of a dying Empire.`;
   this.browser_active  = 0;
   this.handlesEmail    = 1;
   this.emailAppName    = "Imperium";
@@ -25,7 +26,6 @@ function Imperium(app) {
   //
   this.useHUD = 1;
   this.addHUDMenu      = ['Planets','Tech','Trade','Laws'];
-
 
   //
   // this sets the ratio used for determining
@@ -40,7 +40,6 @@ function Imperium(app) {
 
   this.confirms_needed 	 = 0;
   this.confirms_received = 0;
-
 
   //
   // game-related
@@ -96,7 +95,7 @@ Imperium.prototype.handlePlanetsMenuItem = function handlePlanetsMenuItem() {
       <ul>
    `;
   for (let i = 0; i < this.game.players.length; i++) {
-  html += `  <li class="card" id="${i}">${factions[this.game.players[i].faction].name}</li>`;
+    html += `  <li class="card" id="${i}">${factions[this.game.players[i].faction].name}</li>`;
   }
   html += `
       </ul>
@@ -114,7 +113,11 @@ Imperium.prototype.handlePlanetsMenuItem = function handlePlanetsMenuItem() {
 
     let html  = "<ul>";
     for (let z = 0; z < array_of_cards.length; z++) {
-      html += '<li class="cardchoice" id="cardchoice_'+array_of_cards[z]+'">' + imperium_self.returnPlanetCard(array_of_cards[z]) + '</li>';
+      if (imperium_self.game.planets[array_of_cards[z]].exhausted == 1) {
+        html += '<li class="cardchoice exhausted" id="cardchoice_'+array_of_cards[z]+'">' + imperium_self.returnPlanetCard(array_of_cards[z]) + '</li>';
+      } else {
+        html += '<li class="cardchoice" id="cardchoice_'+array_of_cards[z]+'">' + imperium_self.returnPlanetCard(array_of_cards[z]) + '</li>';
+      }
     }
     html += '</ul>';
 
@@ -264,22 +267,18 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
   //
   // specify players
   //
-  // this.totalPlayers = this.game.opponents.length + 1;
-  this.totalPlayers = 3;
+  this.totalPlayers = this.game.opponents.length + 1;
+  //this.totalPlayers = 3;
 
   //
   // position non-hex pieces
   //
   $('.agendabox').css('width', this.gameboardWidth);
 
-
-
-
   //
   // create new board
   //
-  //if (this.game.board == null) {
-  if (1) {
+  if (this.game.board == null) {
 
     this.game.board = {};
     for (let i = 1, j = 4; i <= 7; i++) {
@@ -308,7 +307,6 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
     let x = this.returnStrategyCards();
     for (let i in x) { this.game.state.strategy_cards.push(i); this.game.state.strategy_cards_bonus.push(0); }
 
-
     //
     // put homeworlds on board
     //
@@ -319,11 +317,10 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
       this.game.board[hwsectors[i]].tile = factions[this.game.players[i].faction].homeworld;
     }
 
-
     //
     // remove tiles in 3 player game
     //
-    if (this.totalPlayers == 3) {
+    if (this.totalPlayers <= 3) {
       $('#1_3').attr('id', '');
       delete this.game.board["1_3"];
       $('#1_4').attr('id', '');
@@ -363,8 +360,7 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
         var keys = Object.keys(tmp_sys);
         while (oksel == 0) {
           let rp = keys[Math.floor(keys.length * Math.random())];
-//          if (this.game.systems[rp].hw != 1 && seltil.includes(rp) != 1 && this.game.systems[rp].mr != 1) {
-          if (this.game.systems[rp].hw > -1 && seltil.includes(rp) != 1 && this.game.systems[rp].mr != 1) {
+          if (this.game.systems[rp].hw != 1 && seltil.includes(rp) != 1 && this.game.systems[rp].mr != 1) {
             seltil.push(rp);
             delete tmp_sys[rp];
             this.game.board[i].tile = rp;
@@ -383,34 +379,32 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
 
       let sys = this.returnSystemAndPlanets(hwsectors[i]); 
 
-      if (i+1 == this.game.player) {
-
-	let strongest_planet = 0;
-	let strongest_planet_resources = 0;
-	for (z = 0; z < sys.p.length; z++) {
-	  sys.p[z].owner = (i+1);
- 	  if (sys.p[z].resources < strongest_planet_resources) {
-	    strongest_planet = z;
-	    strongest_planet_resources = sys.p[z].resources;
-	  }
-        }
-
-        this.addSpaceUnit(i + 1, hwsectors[i], "cruiser");
-        this.addSpaceUnit(i + 1, hwsectors[i], "flagship");
-        this.addSpaceUnit(i + 1, hwsectors[i], "dreadnaught");
-        this.addSpaceUnit(i + 1, hwsectors[i], "destroyer");
-        this.addSpaceUnit(i + 1, hwsectors[i], "carrier");
-        this.addSpaceUnit(i + 1, hwsectors[i], "fighter");
-        this.addSpaceUnit(i + 1, hwsectors[i], "fighter");
-        this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "infantry");
-        this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "infantry");
-        this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "infantry");
-        this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "infantry");
-        this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "pds");
-        this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "spacedock");
-
-	this.saveSystemAndPlanets(sys);
+      let strongest_planet = 0;
+      let strongest_planet_resources = 0;
+      for (z = 0; z < sys.p.length; z++) {
+	sys.p[z].owner = (i+1);
+ 	if (sys.p[z].resources < strongest_planet_resources) {
+	  strongest_planet = z;
+	  strongest_planet_resources = sys.p[z].resources;
+	}
       }
+
+      this.addSpaceUnit(i + 1, hwsectors[i], "cruiser");
+      //this.addSpaceUnit(i + 1, hwsectors[i], "flagship");
+      //this.addSpaceUnit(i + 1, hwsectors[i], "dreadnaught");
+      this.addSpaceUnit(i + 1, hwsectors[i], "destroyer");
+      this.addSpaceUnit(i + 1, hwsectors[i], "carrier");
+      //this.addSpaceUnit(i + 1, hwsectors[i], "fighter");
+      this.addSpaceUnit(i + 1, hwsectors[i], "fighter");
+      this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "infantry");
+      this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "infantry");
+      this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "infantry");
+      //this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "infantry");
+      this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "pds");
+      this.loadUnitOntoPlanet(i + 1, hwsectors[i], strongest_planet, "spacedock");
+
+      this.saveSystemAndPlanets(sys);
+
     }
   }
 
@@ -436,10 +430,10 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
   //
   // initialize game queue
   //
-  if (1) {
-     this.game.queue = [];
+  //if (1) {
+  //   this.game.queue = [];
 
-//  if (this.game.queue.length == 0) {
+  if (this.game.queue.length == 0) {
 
     this.game.queue.push("turn");
     this.game.queue.push("newround");
@@ -528,17 +522,13 @@ Imperium.prototype.handleGame = function handleGame(msg=null) {
 
 	let new_round = 1;
         for (let i = 0; i < this.game.players.length; i++) {
-//
-//
-//	  if (this.game.players[i].passed == 0) { new_round = 0; }
-	  if (this.game.players[this.game.player-1].passed == 0) { new_round = 0; }
+	  if (this.game.players[i].passed == 0) { new_round = 0; }
         }
 
 	//
 	// NEW TURN
 	//
 	if (new_round == 1) {
-console.log("\n\nNEW ROUND");
 	  this.game.queue.push("newround");
 	}
 
@@ -551,6 +541,9 @@ console.log("\n\nNEW ROUND");
 	this.game.queue.push("resolve\tnewround");
 
 	this.game.state.round++;
+
+	this.updateLog("ROUND: " + this.game.state.round);
+	this.updateStatus("Moving into Round " + this.game.state.round);
 
 	//
 	// SCORING
@@ -568,7 +561,6 @@ console.log("\n\nNEW ROUND");
 	//
         for (let i = 0; i < this.game.players.length; i++) {
 	  this.game.players[i].passed = 0;
-	  this.game.players[i].strategy_cards_played = 0;
         }
 
 	//
@@ -580,18 +572,34 @@ console.log("\n\nNEW ROUND");
 	// STRATEGY CARDS
 	//
         this.game.queue.push("playerschoosestrategycards");
-	  
+	if (this.game.players.length == 3 || this.game.players.length == 4) {
+          this.game.queue.push("playerschoosestrategycards");
+	}
+	if (this.game.players.length == 2) {
+          this.game.queue.push("playerschoosestrategycards");
+	}
+
+	//
+	// mark as ready 
+	//	  
+	if (this.game.initializing == 1) {
+          this.game.queue.push("EMAIL\tready");
+	}
+
 	//
 	// FLIP NEW AGENDA CARDS
 	//
         this.game.queue.push("revealagendas");
-        this.game.queue.push("FLIPCARD\t3\t3\t1\t1");	// deck card poolnum player
-
+	for (let i = 1; i <= this.game.players.length; i++) {
+          this.game.queue.push("FLIPCARD\t3\t3\t1\t"+i); // deck card poolnum player
+	}
 	return 1;
 
       }
 
       if (mv[0] === "revealagendas") {
+
+	this.updateLog("revealing upcoming agendas...");
 
 	//
 	// reset agendas
@@ -623,7 +631,7 @@ console.log("\n\nNEW ROUND");
         let sector       = mv[5];
         let planet_idx   = mv[6];
 
-	this.updateLog("Invading Planet!");
+	this.updateLog(this.returnFaction(player) + " launches an invasion");
 
 	if (this.game.player != player || player_moves == 1) {
 	  this.invadePlanet(attacker, defender, sector, planet_idx);
@@ -645,7 +653,7 @@ console.log("\n\nNEW ROUND");
 	let vp 		 = parseInt(mv[2]);
 	let objective    = mv[3];
 
-	this.updateLog("Player "+player+" scores "+vp+" VP");
+	this.updateLog(this.returnFaction(player)+" scores "+vp+" VP");
 	this.game.players[player-1].vp += vp;
 
 	this.game.queue.splice(qe-1, 2);
@@ -655,7 +663,8 @@ console.log("\n\nNEW ROUND");
 
       if (mv[0] === "playerschoosestrategycards") {
 
-	let speaker 	 = this.game.state.speaker;
+	this.updateLog("Players selecting strategy cards, starting from " + this.returnSpeaker());
+	this.updateStatus("Players selecting strategy cards, starting from " + this.returnSpeaker());
 
 	//
 	// all strategy cards on table again
@@ -670,22 +679,32 @@ console.log("\n\nNEW ROUND");
           }
 	}
 
-	if (this.game.player == speaker) {
+	if (this.game.player == this.game.state.speaker) {
 
 	  this.addMove("resolve\tplayerschoosestrategycards");
+	  this.addMove("addbonustounselectedstrategycards");
 
           for (let i = 0; i < this.game.players.length; i++) {
-	    let this_player = speaker+i;
+	    let this_player = this.game.state.speaker+i;
 	    if (this_player > this.game.players.length) { this_player -= this.game.players.length; }
 	    this.rmoves.push("pickstrategy\t"+this_player);
           }
-
 
 	  this.endTurn();
 	}
 	return 0;
       }
 
+      if (mv[0] === "addbonustounselectedstrategycards") {
+
+	for (let i = 0; i < this.game.state.strategy_cards.length; i++) {
+	  this.game.state.strategy_cards_bonus[i] += 1;
+	}
+
+        this.game.queue.splice(qe, 1);
+	return 1;
+
+      }
       if (mv[0] === "pickstrategy") {
 
 	let player       = parseInt(mv[1]);
@@ -694,7 +713,7 @@ console.log("\n\nNEW ROUND");
 
 	  this.playerSelectStrategyCards(function(card) {
 	    imperium_self.addMove("resolve\tpickstrategy");
-	    imperium_self.addMove("purchase\t"+this.game.player+"\tstrategy\t"+card);
+	    imperium_self.addMove("purchase\t"+imperium_self.game.player+"\tstrategycard\t"+card);
 	    imperium_self.endTurn();
 	  });
 	  return 0;
@@ -875,7 +894,7 @@ console.log("\n\nNEW ROUND");
         let item         = mv[2];
         let amount       = parseInt(mv[3]);
 
-        if (item == "strategy") {
+        if (item == "strategycard") {
 	  this.game.players[player-1].strategy.push(mv[3]);
 	  for (let i = 0; i < this.game.state.strategy_cards.length; i++) {
 	    if (this.game.state.strategy_cards[i] === mv[3]) {
@@ -1020,7 +1039,10 @@ console.log("\n\nNEW ROUND");
 	  this.tracker = this.returnPlayerTurnTracker();
 	  this.addMove("resolve\tplay");
 	  this.playerTurn();
-        }
+        } else {
+	  this.updateLog(this.returnFaction(parseInt(player)) + " is taking their turn");
+	  this.updateStatus(this.returnFaction(parseInt(player)) + " is taking their turn");
+	}
 
 	return 0;
       }
@@ -1127,6 +1149,12 @@ Imperium.prototype.playerBuyTokens = function playerBuyTokens() {
 
   let imperium_self = this;
 
+  if (this.playerAvailableInfluence() <= 2) {
+    this.updateStatus("Skipping purchase of tokens as insufficient influence...");
+    this.endTurn();
+    return;
+  }
+
   let html = 'Do you wish to purchase any command or strategy tokens? <p></p><ul>';
   html += '<li class="buildchoice" id="command">Command Tokens (<span class="command_total">0</span>)</li>';
   html += '<li class="buildchoice" id="strategy">Strategy Tokens (<span class="strategy_total">0</span>)</li>';
@@ -1152,29 +1180,21 @@ Imperium.prototype.playerBuyTokens = function playerBuyTokens() {
       imperium_self.playerSelectInfluence(total_cost, function(success) {
 
 	if (success == 1) {
-
           imperium_self.addMove("purchase\t"+imperium_self.game.player+"\tcommand\t"+command_tokens);
           imperium_self.addMove("purchase\t"+imperium_self.game.player+"\tcommand\t"+strategy_tokens);
           imperium_self.endTurn();
           return;
-
 	} else {
-
 	  alert("failure to find appropriate influence");
-
 	}
-
       });
-
     };
-
 
     //
     //  figure out if we need to load infantry / fighters
     //
     if (id == "command") 	{ command_tokens++; }
     if (id == "strategy")	{ strategy_tokens++; }
-
 
     let divtotal = "." + id + "_total";
     let x = parseInt($(divtotal).html());
@@ -1388,10 +1408,23 @@ Imperium.prototype.playerProduceUnits = function playerProduceUnits(sector) {
 
   let stuff_to_build = [];  
 
+
   $('.buildchoice').off();
   $('.buildchoice').on('click', function() {
 
     let id = $(this).attr("id");
+
+    let calculated_total_cost = 0;
+    for (let i = 0; i < stuff_to_build.length; i++) {
+      calculated_total_cost += imperium_self.returnUnitCost(stuff_to_build[i]);
+    }
+    calculated_total_cost += imperium_self.returnUnitCost(id);
+
+    if (calculated_total_cost > imperium_self.playerAvailableResources(imperium_self.game.player)) {
+      alert("You cannot build more than you have available to pay for it.");
+      return;
+    }
+
 
     //
     // submit when done
@@ -1573,7 +1606,32 @@ Imperium.prototype.playerSelectPlanet = function playerSelectPlanet(mycallback, 
 
 
 
+Imperium.prototype.playerAvailableResources = function playerAvailableResources(player) {
+
+  let array_of_cards = this.returnPlayerUnexhaustedPlanetCards(player); // unexhausted
+  let total_available_resources = 0;
+  for (let z = 0; z < array_of_cards.length; z++) {
+    total_available_resources += this.game.planets[array_of_cards[z]].resources;
+  }
+  total_available_resources += this.game.players[player-1].goods;
+  return total_available_resources;
+
+}
+Imperium.prototype.playerAvailableInfluence = function playerAvailableInfluence(player) {
+
+  let array_of_cards = this.returnPlayerUnexhaustedPlanetCards(player); // unexhausted
+  let total_available_influence = 0;
+  for (let z = 0; z < array_of_cards.length; z++) {
+    total_available_influence += this.game.planets[array_of_cards[z]].influence;
+  }
+  total_available_influence += this.game.players[player-1].goods;
+  return total_available_influence;
+
+}
+
 Imperium.prototype.playerSelectResources = function playerSelectResources(cost, mycallback) {
+
+  if (cost == 0) { mycallback(1); }
 
   let imperium_self = this;
   let array_of_cards = this.returnPlayerUnexhaustedPlanetCards(this.game.player); // unexhausted
@@ -1618,6 +1676,8 @@ Imperium.prototype.playerSelectResources = function playerSelectResources(cost, 
 }
 
 Imperium.prototype.playerSelectInfluence = function playerSelectInfluence(cost, mycallback) {
+
+  if (cost == 0) { mycallback(1); }
 
   let imperium_self = this;
   let array_of_cards = this.returnPlayerUnexhaustedPlanetCards(this.game.player); // unexhausted
@@ -1665,7 +1725,7 @@ Imperium.prototype.playerSelectActionCard = function playerSelectActionCard(myca
 
   let array_of_cards = this.returnPlayerActionCards(this.game.player);
 
-  let html  = "Select action card: <p></p><ul>";
+  let html = this.returnFaction(this.game.player) + ": select your strategy card: <p></p><ul>";
   for (let z in array_of_cards) {
     html += '<li class="cardchoice" id="'+z+'">' + this.returnActionCard(z) + '</li>';
   }
@@ -1680,13 +1740,17 @@ Imperium.prototype.playerSelectActionCard = function playerSelectActionCard(myca
 }
 
 
+//
+// this is when players are choosing to play the cards that they have 
+// already chosen.
+//
 Imperium.prototype.playerSelectStrategyCard = function playerSelectStrategyCard(mycallback) {
 
   let array_of_cards = this.game.players[this.game.player-1].strategy;
 
-  let html  = "Select strategy card: <p></p><ul>";
+  let html = "<ul>";
   for (let z in array_of_cards) {
-    html += '<li class="cardchoice" id="'+z+'">' + this.returnStrategyCard(z) + '</li>';
+    html += '<li class="cardchoice" id="'+array_of_cards[z]+'">' + this.returnStrategyCard(array_of_cards[z]) + '</li>';
   }
   html += '</ul>';
 
@@ -1699,7 +1763,10 @@ Imperium.prototype.playerSelectStrategyCard = function playerSelectStrategyCard(
 }
 
 
-
+//
+// this is when players select at the begining of the round, not when they 
+// are chosing to play the cards that they have already selected
+//
 Imperium.prototype.playerSelectStrategyCards = function playerSelectStrategyCards(mycallback) {
 
   let html  = "Select strategy card: <p></p><ul>";
@@ -1734,12 +1801,16 @@ Imperium.prototype.playerSelectUnitsToMove = function playerSelectUnitsToMove(de
   sectors = x.sectors; distance = x.distance;
   ships_and_sectors = this.returnShipsMovableToDestinationFromSectors(destination, sectors, distance);
 
+console.log(JSON.stringify(ships_and_sectors));
+
+
   //
   // highlight ships
   //
   for (let i = 0; i < ships_and_sectors.length; i++) {
+console.log("LOOPING AT: " + ships_and_sectors[i].sector);
     let sys = this.returnSystemAndPlanets(ships_and_sectors[i].sector);
-    html += '<b>'+sys.s.name+'</b>';
+    html += '<b style="margin-top:10px">'+sys.s.name+'</b>';
     html += '<ul>';
     for (let ii = 0; ii < ships_and_sectors[i].ships.length; ii++) {
       html += '<li id="sector_'+i+'_'+ii+'" class="shipchoice">'+ships_and_sectors[i].ships[ii].name+'</li>';
@@ -2232,6 +2303,7 @@ Imperium.prototype.updatePlanetOwner = function updatePlanetOwner(sector, planet
   }
   if (owner != -1) {
     sys.p[planet_idx].owner = owner;
+    sys.p[planet_idx].exhausted = 1;
   }
   this.saveSystemAndPlanets(sys);
 }
@@ -2330,7 +2402,9 @@ Imperium.prototype.loadUnitOntoPlanet = function loadUnitOntoPlanet(player, sect
   return JSON.stringify(unit_to_add);
 };
 Imperium.prototype.loadUnitByJSONOntoPlanet = function loadUnitByJSONOntoPlanet(player, sector, planet_idx, unitjson) {
+console.log("LOAD UNIT BY JSON Onto Planet in Sector: " + sector);
   let sys = this.returnSystemAndPlanets(sector);
+console.log("LOAD UNIT BY JSON Onto Planet " + planet_idx);
   sys.p[planet_idx].units[player - 1].push(JSON.parse(unitjson));
   this.saveSystemAndPlanets(sys);
   return unitjson;
@@ -2636,6 +2710,7 @@ Imperium.prototype.invadePlanet = function invadePlanet(attacker, defender, sect
     // planet changes ownership
     //
     sys.p[planet_idx].owner = attacker;
+    sys.p[planet_idx].exhausted = 1;
 
   } else {
 
@@ -2766,6 +2841,12 @@ Imperium.prototype.invadeSector = function invadeSector(attacker, sector) {
   //
   this.saveSystemAndPlanets(sys);
 
+}
+
+
+Imperium.prototype.isPlanetExhausted = function isPlanetExhausted(planetname) {
+  if (this.game.planets[planetname].exhausted == 1) { return 1; }
+  return 0;
 }
 
 
@@ -3233,42 +3314,42 @@ Imperium.prototype.returnSystems = function returnSystems() {
 
   var systems = {};
 
-  systems['sector1']         = { img : "/imperium/images/sector1.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-  systems['sector2']         = { img : "/imperium/images/sector2.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-  systems['sector3']         = { img : "/imperium/images/sector3.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-  systems['sector4']         = { img : "/imperium/images/sector4.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-  systems['sector5']         = { img : "/imperium/images/sector5.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-  systems['sector6']         = { img : "/imperium/images/sector6.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-  systems['sector7']         = { img : "/imperium/images/sector7.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-  systems['sector8']         = { img : "/imperium/images/sector8.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet1','planet2'] }
-  systems['sector9']         = { img : "/imperium/images/sector9.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet3','planet4'] }
-  systems['sector10']        = { img : "/imperium/images/sector10.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet5','planet6'] }
-  systems['sector11']        = { img : "/imperium/images/sector11.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet7','planet8'] }
-  systems['sector12']        = { img : "/imperium/images/sector12.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet9','planet10'] }
-  systems['sector13']        = { img : "/imperium/images/sector13.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet11','planet12'] }
-  systems['sector14']        = { img : "/imperium/images/sector14.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet13','planet14'] }
-  systems['sector15']        = { img : "/imperium/images/sector15.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet15','planet16'] }
-  systems['sector16']        = { img : "/imperium/images/sector16.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet17','planet18'] }
-  systems['sector17']        = { img : "/imperium/images/sector17.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet19','planet20'] }
-  systems['sector18']        = { img : "/imperium/images/sector18.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet21','planet22'] }
-  systems['sector19']        = { img : "/imperium/images/sector19.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet23','planet24'] }
-  systems['sector20']        = { img : "/imperium/images/sector20.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet25','planet26'] }
-  systems['sector21']        = { img : "/imperium/images/sector21.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet27','planet28'] }
-  systems['sector22']        = { img : "/imperium/images/sector22.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet29'] }
-  systems['sector23']        = { img : "/imperium/images/sector23.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet30'] }
-  systems['sector24']        = { img : "/imperium/images/sector24.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet31'] }
-  systems['sector25']        = { img : "/imperium/images/sector25.png" , 	   name : "" , hw : 0 , mr : 1 , planets : ['planet32'] }
-  systems['sector26']        = { img : "/imperium/images/sector26.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet33'] }
-  systems['sector27']        = { img : "/imperium/images/sector27.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet34'] }
-  systems['sector28']        = { img : "/imperium/images/sector28.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet35'] }
-  systems['sector29']        = { img : "/imperium/images/sector29.png" , 	   name : "" , hw : 0 , mr : 0 , planets : ['planet36'] }
-  systems['sector30']        = { img : "/imperium/images/sector30.png" , 	   name : "" , hw : 1 , mr : 0 , planets : ['planet37'] }
-  systems['sector31']        = { img : "/imperium/images/sector31.png" , 	   name : "" , hw : 1 , mr : 0 , planets : ['planet38'] }
-  systems['sector32']        = { img : "/imperium/images/sector32.png" , 	   name : "" , hw : 1 , mr : 0 , planets : ['planet39'] }
-  systems['sector33']        = { img : "/imperium/images/sector33.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-  systems['sector34']        = { img : "/imperium/images/sector34.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-  systems['sector35']        = { img : "/imperium/images/sector35.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
-  systems['sector36']        = { img : "/imperium/images/sector36.png" , 	   name : "" , hw : 0 , mr : 0 , planets : [] }
+  systems['sector1']         = { img : "/imperium/images/sector1.png" , 	   name : "Sector 1" , hw : 0 , mr : 0 , planets : [] }
+  systems['sector2']         = { img : "/imperium/images/sector2.png" , 	   name : "Sector 2" , hw : 0 , mr : 0 , planets : [] }
+  systems['sector3']         = { img : "/imperium/images/sector3.png" , 	   name : "Sector 3" , hw : 0 , mr : 0 , planets : [] }
+  systems['sector4']         = { img : "/imperium/images/sector4.png" , 	   name : "Sector 4" , hw : 0 , mr : 0 , planets : [] }
+  systems['sector5']         = { img : "/imperium/images/sector5.png" , 	   name : "Sector 5" , hw : 0 , mr : 0 , planets : [] }
+  systems['sector6']         = { img : "/imperium/images/sector6.png" , 	   name : "Sector 6" , hw : 0 , mr : 0 , planets : [] }
+  systems['sector7']         = { img : "/imperium/images/sector7.png" , 	   name : "Sector 7" , hw : 0 , mr : 0 , planets : [] }
+  systems['sector8']         = { img : "/imperium/images/sector8.png" , 	   name : "Sector 8" , hw : 0 , mr : 0 , planets : ['planet1','planet2'] }
+  systems['sector9']         = { img : "/imperium/images/sector9.png" , 	   name : "Sector 9" , hw : 0 , mr : 0 , planets : ['planet3','planet4'] }
+  systems['sector10']        = { img : "/imperium/images/sector10.png" , 	   name : "Sector 10" , hw : 0 , mr : 0 , planets : ['planet5','planet6'] }
+  systems['sector11']        = { img : "/imperium/images/sector11.png" , 	   name : "Sector 11" , hw : 0 , mr : 0 , planets : ['planet7','planet8'] }
+  systems['sector12']        = { img : "/imperium/images/sector12.png" , 	   name : "Sector 12" , hw : 0 , mr : 0 , planets : ['planet9','planet10'] }
+  systems['sector13']        = { img : "/imperium/images/sector13.png" , 	   name : "Sector 13" , hw : 0 , mr : 0 , planets : ['planet11','planet12'] }
+  systems['sector14']        = { img : "/imperium/images/sector14.png" , 	   name : "Sector 14" , hw : 0 , mr : 0 , planets : ['planet13','planet14'] }
+  systems['sector15']        = { img : "/imperium/images/sector15.png" , 	   name : "Sector 15" , hw : 0 , mr : 0 , planets : ['planet15','planet16'] }
+  systems['sector16']        = { img : "/imperium/images/sector16.png" , 	   name : "Sector 16" , hw : 0 , mr : 0 , planets : ['planet17','planet18'] }
+  systems['sector17']        = { img : "/imperium/images/sector17.png" , 	   name : "Sector 17" , hw : 0 , mr : 0 , planets : ['planet19','planet20'] }
+  systems['sector18']        = { img : "/imperium/images/sector18.png" , 	   name : "Sector 18" , hw : 0 , mr : 0 , planets : ['planet21','planet22'] }
+  systems['sector19']        = { img : "/imperium/images/sector19.png" , 	   name : "Sector 19" , hw : 0 , mr : 0 , planets : ['planet23','planet24'] }
+  systems['sector20']        = { img : "/imperium/images/sector20.png" , 	   name : "Sector 20" , hw : 0 , mr : 0 , planets : ['planet25','planet26'] }
+  systems['sector21']        = { img : "/imperium/images/sector21.png" , 	   name : "Sector 21" , hw : 0 , mr : 0 , planets : ['planet27','planet28'] }
+  systems['sector22']        = { img : "/imperium/images/sector22.png" , 	   name : "Sector 22" , hw : 0 , mr : 0 , planets : ['planet29'] }
+  systems['sector23']        = { img : "/imperium/images/sector23.png" , 	   name : "Sector 23" , hw : 0 , mr : 0 , planets : ['planet30'] }
+  systems['sector24']        = { img : "/imperium/images/sector24.png" , 	   name : "Sector 24" , hw : 0 , mr : 0 , planets : ['planet31'] }
+  systems['sector25']        = { img : "/imperium/images/sector25.png" , 	   name : "New Byzantium" , hw : 0 , mr : 1 , planets : ['planet32'] }
+  systems['sector26']        = { img : "/imperium/images/sector26.png" , 	   name : "Sector 26" , hw : 0 , mr : 0 , planets : ['planet33'] }
+  systems['sector27']        = { img : "/imperium/images/sector27.png" , 	   name : "Sector 27" , hw : 0 , mr : 0 , planets : ['planet34'] }
+  systems['sector28']        = { img : "/imperium/images/sector28.png" , 	   name : "Sector 28" , hw : 0 , mr : 0 , planets : ['planet35'] }
+  systems['sector29']        = { img : "/imperium/images/sector29.png" , 	   name : "Sector 29" , hw : 0 , mr : 0 , planets : ['planet36'] }
+  systems['sector30']        = { img : "/imperium/images/sector30.png" , 	   name : "Sector 30" , hw : 1 , mr : 0 , planets : ['planet37'] }
+  systems['sector31']        = { img : "/imperium/images/sector31.png" , 	   name : "Sector 31" , hw : 1 , mr : 0 , planets : ['planet38'] }
+  systems['sector32']        = { img : "/imperium/images/sector32.png" , 	   name : "Sector 32" , hw : 0 , mr : 0 , planets : ['planet39'] }
+  systems['sector33']        = { img : "/imperium/images/sector33.png" , 	   name : "Sector 33" , hw : 0 , mr : 0 , planets : [] }
+  systems['sector34']        = { img : "/imperium/images/sector34.png" , 	   name : "Sector 34" , hw : 0 , mr : 0 , planets : [] }
+  systems['sector35']        = { img : "/imperium/images/sector35.png" , 	   name : "Sector 35" , hw : 0 , mr : 0 , planets : [] }
+  systems['sector36']        = { img : "/imperium/images/sector36.png" , 	   name : "Sector 36" , hw : 0 , mr : 0 , planets : [] }
 
   for (var i in systems) {
     systems[i].units = [this.totalPlayers]; // array to store units
@@ -3841,6 +3922,10 @@ Imperium.prototype.returnFaction = function returnFaction(player) {
   if (this.game.players[player-1] == undefined) { return "Unknown"; }
   return factions[this.game.players[player-1].faction].name;
 }
+Imperium.prototype.returnSpeaker = function returnSpeaker() {
+  let factions = this.returnFactions();
+  return factions[this.game.players[this.game.state.speaker-1].faction].name;
+}
 
 Imperium.prototype.returnPlayers = function returnPlayers(num=0) {
 
@@ -3919,13 +4004,14 @@ Imperium.prototype.returnUnitCost = function returnUnitCost(name) {
 Imperium.prototype.returnFactions = function returnFactions() {
   var factions = {};
   factions['faction1'] = {
-    homeworld: "sector32",
+    homeworld: "sector30",
     name: "Faction 1"
   };
-  factions['faction22'] = {
-    homeworld: "sector32",
+  factions['faction2'] = {
+    homeworld: "sector31",
     name: "Faction 2"
   };
+/**
   factions['faction3'] = {
     homeworld: "sector32",
     name: "Faction 3"
@@ -3986,6 +4072,7 @@ Imperium.prototype.returnFactions = function returnFactions() {
     homeworld: "sector32",
     name: "Faction 17"
   };
+**/
   return factions;
 }; 
 
@@ -3995,19 +4082,23 @@ Imperium.prototype.returnFactions = function returnFactions() {
 // Return Starting Positions //
 ///////////////////////////////
 Imperium.prototype.returnHomeworldSectors = function returnHomeworldSectors(players = 4) {
-  if (players == 3) {
+  if (players <= 2) {
+    return ["1_1", "4_7"];
+  }
+
+  if (players <= 3) {
     return ["1_1", "4_7", "7_1"];
   }
 
-  if (players == 4) {
+  if (players <= 4) {
     return ["1_3", "3_1", "5_6", "7_2"];
   }
 
-  if (players == 5) {
+  if (players <= 5) {
     return ["1_3", "3_1", "4_7", "7_1", "7_4"];
   }
 
-  if (players == 6) {
+  if (players <= 6) {
     return ["1_1", "1_4", "4_1", "4_7", "7_1", "7_7"];
   }
 };
@@ -4228,7 +4319,8 @@ Imperium.prototype.updateSectorGraphics = function updateSectorGraphics(sector) 
     //
     // space
     //
-    if ((sys.s.units[player-1].length > 0 && updated_space_graphics == 0) || (updated_space_graphics == 0 && player == this.totalPlayers-1)) {
+    //if ((sys.s.units[player-1].length > 0 && updated_space_graphics == 0) || (updated_space_graphics == 0 && player == this.totalPlayers-1)) {
+    if (sys.s.units[player-1].length > 0 && updated_space_graphics == 0) {
 
       updated_space_graphics = 1;
 
@@ -4259,7 +4351,6 @@ Imperium.prototype.updateSectorGraphics = function updateSectorGraphics(sector) 
 
       let fleet_color = "color"+player;
       
-
       // fighters
       html += '<div class="fighters" alt="'+fighters+'">';
       if (fighters > 0) { html += `<div class="fighter ${fleet_color}">`+fighters+`</div>`; }
@@ -4575,19 +4666,15 @@ Imperium.prototype.playStrategyCardPrimary = function playStrategyCardPrimary(pl
 
   let imperium_self = this;
 
+  let strategy_cards = this.returnStrategyCards();
+  this.updateStatus(this.returnFaction(player) + " is playing the " + strategy_cards[card].name + " strategy card");
 
-  //
-  // EDIT OUT
-  //
-  //let player_confirmation_needed = this.game.players.length;
-  let player_confirmation_needed = 1;
+  let player_confirmation_needed = this.game.players.length;
 
   if (card == "initiative") {
 
-    this.game.players[player].command_tokens += 2;
-    this.game.players[player].strategy_tokens += 1;
-
-    this.addMove("notify\t"+player+" gains 2 command and 1 strategy tokens");
+    this.game.players[player-1].command_tokens += 2;
+    this.game.players[player-1].strategy_tokens += 1;
 
     if (this.game.player == player) {
       this.addMove("resolve\tstrategy");
@@ -4706,20 +4793,14 @@ Imperium.prototype.playStrategyCardPrimary = function playStrategyCardPrimary(pl
         imperium_self.addMove("purchase\t"+player+"\ttechnology\t"+tech);
         imperium_self.endTurn();
       });
-
     }
-
-
   }
+
   if (card == "empire") {
 
-    //
-    // make note of the fact we have scored
-    //
     this.game.state.round_scoring = 1;
 
     if (this.game.player == player) {
-
       this.playerScoreVictoryPoints(function(vp, objective) {
         imperium_self.addMove("resolve\tstrategy");
         imperium_self.addMove("strategy\t"+card+"\t"+player+"\t2\t"+player_confirmation_needed);
@@ -4728,9 +4809,7 @@ Imperium.prototype.playStrategyCardPrimary = function playStrategyCardPrimary(pl
 	}
         imperium_self.endTurn();
       });
-
     }
-
 
   }
 
@@ -4742,6 +4821,9 @@ Imperium.prototype.playStrategyCardPrimary = function playStrategyCardPrimary(pl
 Imperium.prototype.playStrategyCardSecondary = function playStrategyCardSecondary(player, card) {
 
   let imperium_self = this;
+
+  let strategy_cards = this.returnStrategyCards();
+  this.updateStatus("Moving into the secondary of the " + strategy_cards[card].name + " strategy card");
 
   //
   // we need to wait for everyone to confirm to move on
