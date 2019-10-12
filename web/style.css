@@ -5,6 +5,24 @@
 
 
 
+.player_color_box {
+  width: 25px;
+  height: 25px;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.terminal_header {
+  margin-bottom: 15px;
+}
+.terminal_header2 {
+  margin-bottom: 15px;
+}
+.terminal_header3 {
+}
+
+
+
 .exhausted {
   opacity: 0.3;
 }
