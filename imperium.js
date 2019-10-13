@@ -350,7 +350,7 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
     //
     // empty space in board center
     //
-    this.game.board["4_4"].tile = "sector25";
+    this.game.board["4_4"].tile = "new-byzantium";
 
     for (let i in this.game.board) {
       if (i != "4_4" && !hwsectors.includes(i)) {
@@ -445,7 +445,9 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
     this.game.queue.push("SHUFFLE\t4");
     this.game.queue.push("SHUFFLE\t5");
     this.game.queue.push("SHUFFLE\t6");
-    this.game.queue.push("POOL\t1");
+    this.game.queue.push("POOL\t3");   // stage ii objectives
+    this.game.queue.push("POOL\t2");   // stage i objectives
+    this.game.queue.push("POOL\t1");   // agenda cards
     this.game.queue.push("DECK\t1\t"+JSON.stringify(this.returnStrategyCards()));
     this.game.queue.push("DECK\t2\t"+JSON.stringify(this.returnActionCards()));	
     this.game.queue.push("DECK\t3\t"+JSON.stringify(this.returnAgendaCards()));
@@ -608,7 +610,27 @@ console.log("\n\n\nINITIATIVE ORDER: " + initiative_order);
 	for (let i = 1; i <= this.game.players.length; i++) {
           this.game.queue.push("FLIPCARD\t3\t3\t1\t"+i); // deck card poolnum player
 	}
+
+	//
+	// FLIP NEW OBJECTIVES
+	//
+        if (this.game.state.round == 1) {
+	console.log("\n\n\n\nFLIPPING PUBLIC OBJECTIVES!\n\n\n");
+        this.game.queue.push("revealobjectives");
+	for (let i = 1; i <= this.game.players.length; i++) {
+          this.game.queue.push("FLIPCARD\t4\t8\t2\t"+i); // deck card poolnum player
+	}
+	for (let i = 1; i <= this.game.players.length; i++) {
+          this.game.queue.push("FLIPCARD\t5\t8\t2\t"+i); // deck card poolnum player
+	}
+        }
+
+
 	return 1;
+
+        //
+        //
+        //
 
       }
 
@@ -631,6 +653,31 @@ console.log("\n\n\nINITIATIVE ORDER: " + initiative_order);
 
 	this.updateAgendaDisplay();
 	this.updateLeaderboard();
+
+	this.game.queue.splice(qe, 1);
+	return 1;
+      }
+
+      if (mv[0] === "revealobjectives") {
+
+	this.updateLog("revealing upcoming objectives...");
+
+	//
+	// reset agendas
+	//
+        this.game.state.stage_i_objectives = [];
+        this.game.state.stage_ii_objectives = [];
+        this.game.state.secret_objectives = [];
+
+        for (i = 0; i < this.game.pool[1].hand.length; i++) {
+          this.game.state.stage_i_objectives.push(this.game.pool[1].hand[i]);	
+	}
+        for (i = 0; i < this.game.pool[1].hand.length; i++) {
+          this.game.state.stage_ii_objectives.push(this.game.pool[1].hand[i]);	
+	}
+
+console.log("UPDATED OBJECTIVES I " + JSON.stringify(this.game.state.stage_i_objectives));
+console.log("UPDATED OBJECTIVES II " + JSON.stringify(this.game.state.stage_ii_objectives));
 
 	this.game.queue.splice(qe, 1);
 	return 1;
@@ -843,6 +890,9 @@ console.log("\n\n\nINITIATIVE ORDER: " + initiative_order);
 	}
         if (type == "strategy") {
 	  this.game.players[player-1].strategy_tokens -= parseInt(details);
+	}
+        if (type == "trade") {
+	  this.game.players[player-1].goods -= parseInt(details);
 	}
         if (type == "planet") {
 	  this.game.planets[details].exhausted = 1;
@@ -1138,6 +1188,7 @@ Imperium.prototype.playerTurn = function playerTurn(stage="main") {
     let html  = '<div class="terminal_header">[command: '+this.game.players[this.game.player-1].command_tokens+'] [strategy: '+this.game.players[this.game.player-1].strategy_tokens+'] [fleet: '+this.game.players[this.game.player-1].fleet_supply+']</div>';
         html  += '<p style="margin-top:20px"></p>';
         html  += '<div class="terminal_header2"><div class="player_color_box '+playercol+'"></div>' + this.returnFaction(this.game.player) + ":</div><p></p><ul class='terminal_header3'>";
+    html += '<li class="option" id="discard_tokens">discard tokens</li>';
     if (this.game.players[this.game.player-1].command_tokens > 0) {
       html += '<li class="option" id="activate">activate system</li>';
     }
@@ -1200,7 +1251,7 @@ Imperium.prototype.playerBuyTokens = function playerBuyTokens() {
 
   let imperium_self = this;
 
-  if (this.playerAvailableInfluence(this.game.player) <= 2) {
+  if (this.returnAvailableInfluence(this.game.player) <= 2) {
     this.updateStatus("Skipping purchase of tokens as insufficient influence...");
     this.endTurn();
     return;
@@ -1376,9 +1427,38 @@ Imperium.prototype.playerResearchTechnology = function playerResearchTechnology(
 
 }
 
-Imperium.prototype.canPlayerScoreVictoryPoints = function canPlayerScoreVictoryPoints(card) {
+Imperium.prototype.canPlayerScoreVictoryPoints = function canPlayerScoreVictoryPoints(player, card="", deck=1) {
 
-  return 1;
+  if (card == "") { return 0; }
+
+  let imperium_self = this;
+
+  // deck 1 = primary
+  // deck 2 = secondary
+  // deck 3 = secret
+
+  if (deck == 1) {
+    let objectives = this.returnStageIPublicObjectives();
+    if (objectives[card] != "") {
+      if (objectives[card].func(imperium_self, player) == 1) { return 1; }
+    }
+  }
+
+  if (deck == 2) {
+    let objectives = this.returnStageIIPublicObjectives();
+    if (objectives[card] != "") {
+      if (objectives[card].func(imperium_self, player) == 1) { return 1; }
+    }
+  }
+
+  if (deck == 3) {
+    let objectives = this.returnSecretObjectives();
+    if (objectives[card] != "") {
+      if (objectives[card].func(imperium_self, player) == 1) { return 1; }
+    }
+  }
+
+  return 0;
 
 }
 Imperium.prototype.playerScoreVictoryPoints = function playerScoreVictoryPoints(mycallback) {
@@ -1387,22 +1467,22 @@ Imperium.prototype.playerScoreVictoryPoints = function playerScoreVictoryPoints(
 
   // Stage I Public Objectives
   for (var i in this.game.deck[3].cards) {
-    if (this.canPlayerScoreVictoryPoints(this.game.player, i)) {
-      html += '<li class="option" id="'+i+'">'+this.game.deck[3].cards[i].name+'</li>';
+    if (this.canPlayerScoreVictoryPoints(this.game.player, i, 1)) {
+      html += '1 VP Public Objective: <li class="option stage1" id="'+i+'">'+this.game.deck[3].cards[i].name+'</li>';
     }
   }
 
   // Stage II Public Objectives
   for (var i in this.game.deck[4].cards) {
-    if (this.canPlayerScoreVictoryPoints(this.game.player, i)) {
-      html += '<li class="option" id="'+i+'">'+this.game.deck[4].cards[i].name+'</li>';
+    if (this.canPlayerScoreVictoryPoints(this.game.player, i, 2)) {
+      html += '2 VP Public Objective: <li class="option stage2" id="'+i+'">'+this.game.deck[4].cards[i].name+'</li>';
     }
   }
 
   // Secret Objectives
   for (var i in this.game.deck[5].cards) {
-    if (this.canPlayerScoreVictoryPoints(this.game.player, i)) {
-      html += '<li class="option" id="'+i+'">'+this.game.deck[5].cards[i].name+'</li>';
+    if (this.canPlayerScoreVictoryPoints(this.game.player, i, 3)) {
+      html += '1 VP Secret Objective: <li class="option secret3" id="'+i+'">'+this.game.deck[5].cards[i].name+'</li>';
     }
   }
 
@@ -1415,6 +1495,11 @@ Imperium.prototype.playerScoreVictoryPoints = function playerScoreVictoryPoints(
   $('.option').on('click', function() {
 
     let action = $(this).attr("id");
+    let objective_type = 3;
+
+    if ($(this).hasClass("stage1")) { objective_type = 1; }
+    if ($(this).hasClass("stage2")) { objective_type = 2; }
+    if ($(this).hasClass("secret3")) { objective_type = 3; }
 
     if (action == "no") {
 
@@ -1422,6 +1507,7 @@ Imperium.prototype.playerScoreVictoryPoints = function playerScoreVictoryPoints(
 
     } else {
 
+      imperium_self.playerPostScoreVictoryPoints(action, objective_type, mycallback);
       let vp = 2;
       let objective = "SECRET OBJECTIVE: mining power";
       mycallback(vp, objective);
@@ -1430,7 +1516,32 @@ Imperium.prototype.playerScoreVictoryPoints = function playerScoreVictoryPoints(
   });
 }
 
+Imperium.prototype.playerPostScoreVictoryPoints = function playerPostScoreVictoryPoints(objective, deck, mycallback) {
 
+  if (deck == 1) {
+    let objectives = this.returnStageIPublicObjectives();
+    objectives[card].post(imperium_self, player, function(success) {
+      mycallback(1, objective);
+    });
+  }
+
+  if (deck == 2) {
+    let objectives = this.returnStageIIPublicObjectives();
+    objectives[card].post(imperium_self, player, function(success) {
+      mycallback(2, objective);
+    });
+  }
+
+  if (deck == 3) {
+    let objectives = this.returnSecretObjectives();
+    objectives[card].post(imperium_self, player, function(success) {
+      mycallback(1, objective);
+    });
+  }
+
+  mycallback(0, "null-vp-objective");
+
+}
 
 
 
@@ -1509,7 +1620,7 @@ Imperium.prototype.playerProduceUnits = function playerProduceUnits(sector) {
     }
     calculated_total_cost += imperium_self.returnUnitCost(id);
 
-    if (calculated_total_cost > imperium_self.playerAvailableResources(imperium_self.game.player)) {
+    if (calculated_total_cost > imperium_self.returnAvailableResources(imperium_self.game.player)) {
       alert("You cannot build more than you have available to pay for it.");
       return;
     }
@@ -1695,7 +1806,7 @@ Imperium.prototype.playerSelectPlanet = function playerSelectPlanet(mycallback, 
 
 
 
-Imperium.prototype.playerAvailableResources = function playerAvailableResources(player) {
+Imperium.prototype.returnAvailableResources = function returnAvailableResources(player) {
 
   let array_of_cards = this.returnPlayerUnexhaustedPlanetCards(player); // unexhausted
   let total_available_resources = 0;
@@ -1706,7 +1817,7 @@ Imperium.prototype.playerAvailableResources = function playerAvailableResources(
   return total_available_resources;
 
 }
-Imperium.prototype.playerAvailableInfluence = function playerAvailableInfluence(player) {
+Imperium.prototype.returnAvailableInfluence = function returnAvailableInfluence(player) {
 
   let array_of_cards = this.returnPlayerUnexhaustedPlanetCards(player); // unexhausted
   let total_available_influence = 0;
@@ -1759,6 +1870,56 @@ Imperium.prototype.playerSelectResources = function playerSelectResources(cost, 
     selected_cost += imperium_self.game.planets[array_of_cards[idx]].resources;
 
     if (cost <= selected_cost) { mycallback(1); }
+
+  });
+
+}
+
+Imperium.prototype.playerSelectStrategyAndCommandTokens = function playerSelectStrategyAndCommandTokens(cost, mycallback) {
+
+  if (cost == 0) { mycallback(1); }
+
+  let imperium_self = this;
+
+  let selected_cost  = 0;
+  let strategy_spent = 0;
+  let command_spent  = 0;
+
+  let html  = "Select "+cost+" in influence: <p></p><ul>";
+      html += '<li class="option" id="command"><span id="player_command_total">'+this.game.players[this.game.player-1].command_tokens+'</span> remaining command tokens</li>';
+      html += '<li class="option" id="strategy"><span id="player_strategy_total">'+this.game.players[this.game.player-1].strategy_tokens+'</span> remaining strategy tokens</li>';
+      html += '</ul>';
+
+  this.updateStatus(html);
+
+  $('.option').off();
+  $('.option').on('click', function() {
+
+    let action = $(this).attr("id");
+    let divid = "#player_"+action+"_total";
+
+    if (action == "command") {
+      let remaining = imperium_self.game.players[this.game.player-1].command_tokens - command_spent;
+      if (remaining > 0) {
+        command_spent++;
+        imperium_self.addMove("expend\t"+imperium_self.game.player+"\t"+"command"+"\t"+1);
+        $(divid).html((remaining-1));
+      }
+    }
+    if (action == "strategy") {
+      let remaining = imperium_self.game.players[this.game.player-1].command_tokens - strategy_spent;
+      if (remaining > 0) {
+        strategy_spent++;
+        imperium_self.addMove("expend\t"+imperium_self.game.player+"\t"+"strategy"+"\t"+1);
+        $(divid).html((remaining-1));
+      }
+    }
+
+    selected_cost = strategy_spent + command_spent;
+
+    if (selected_cost >= cost) {
+      mycallback(1);
+    }
 
   });
 
@@ -2486,7 +2647,9 @@ Imperium.prototype.removeSpaceUnitByJSON = function removeSpaceUnitByJSON(player
 
 
 Imperium.prototype.loadUnitOntoPlanet = function loadUnitOntoPlanet(player, sector, planet_idx, unitname) {
+console.log("LOAD UNIT BY JSON Onto Planet in Sector: " + sector);
   let sys = this.returnSystemAndPlanets(sector);
+console.log("LOAD UNIT BY JSON Onto Planet " + planet_idx);
   let unit_to_add = this.returnUnit(unitname);
   sys.p[planet_idx].units[player - 1].push(unit_to_add);
   this.saveSystemAndPlanets(sys);
@@ -3472,7 +3635,11 @@ Imperium.prototype.returnState = function returnState() {
       state.agendas = [];
       state.strategy_cards = [];
       state.strategy_cards_bonus = [];
-    
+      state.stage_i_objectives = [];
+      state.stage_ii_objectives = [];
+      state.secret_objectives = [];
+
+
   return state;
 }
 
@@ -3518,7 +3685,7 @@ Imperium.prototype.returnSystems = function returnSystems() {
   systems['sector34']        = { img : "/imperium/images/sector36.png" , 	   name : "Sector 36" , hw : 0 , mr : 0 , planets : [] }
   systems['new-byzantium']   = { img : "/imperium/images/sector25.png" , 	   name : "New Byzantium" , hw : 0 , mr : 1 , planets : ['planet33'] }
   systems['homeworld1']      = { img : "/imperium/images/sector30.png" , 	   name : "Sector 30" , hw : 1 , mr : 0 , planets : ['planet37'] }
-  systems['honmeworld2']     = { img : "/imperium/images/sector31.png" , 	   name : "Sector 31" , hw : 1 , mr : 0 , planets : ['planet38'] }
+  systems['homeworld2']     = { img : "/imperium/images/sector31.png" , 	   name : "Sector 31" , hw : 1 , mr : 0 , planets : ['planet38'] }
 
   for (var i in systems) {
     systems[i].units = [this.totalPlayers]; // array to store units
@@ -3849,6 +4016,9 @@ Imperium.prototype.returnStageIPublicObjectives = function returnStageIPublicObj
 
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
     }
   };
   obj['forge-of-war']				= {
@@ -3865,6 +4035,9 @@ Imperium.prototype.returnStageIPublicObjectives = function returnStageIPublicObj
       if (unit_upgrades >= 2) { return 1; }
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
     }
   };
   obj['diversified-research']			= {
@@ -3893,7 +4066,11 @@ Imperium.prototype.returnStageIPublicObjectives = function returnStageIPublicObj
       if (criteria >= 2) { return 1; }
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
     }
+
   };
   obj['mining-conglomerate']			= {
     name 	: 	"Mining Conglomerate" ,
@@ -3907,6 +4084,11 @@ Imperium.prototype.returnStageIPublicObjectives = function returnStageIPublicObj
       }
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      imperium_self.playerSelectResources(8, function(success) {
+        mycallback(1);
+      });
     }
   };
   obj['colonization']				= {
@@ -3915,6 +4097,21 @@ Imperium.prototype.returnStageIPublicObjectives = function returnStageIPublicObj
     text	:	"Control six planets outside your home system" ,
     func	:	function(imperium_self, player) {
 
+      let homeplanets = imperium_self.returnPlayerHomeworldPlanets(player);
+      let planets = imperium_self.returnPlayerPlanetCards(player);
+
+      let total_non_home_planets = 0;
+
+      for (let i = 0; i < planets.length; i++) {
+	if (!homeplanets.includes(planets[i])) { total_non_home_planets++; }
+      }
+
+      if (total_non_home_planets >= 6) { return 1; }
+      return 0;
+
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
     }
   };
   obj['conquest-of-science']			= {
@@ -3935,6 +4132,9 @@ Imperium.prototype.returnStageIPublicObjectives = function returnStageIPublicObj
 
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
     }
   };
   obj['grand-gesture']				= {
@@ -3942,10 +4142,13 @@ Imperium.prototype.returnStageIPublicObjectives = function returnStageIPublicObj
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Spend 3 command or strategy tokens when scoring" ,
     func	:	function(imperium_self, player) {
-
       if ((imperium_self.game.players[player-1].command_tokens + imperium_self.game.players[player-1].strategy_tokens) >= 3) { return 1; }
       return 0;
-
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      imperium_self.playerSelectStrategyAndCommandTokens(3, function(success) {
+        mycallback(1);
+      });
     }
   };
   obj['trade-outposts']				= {
@@ -3957,7 +4160,12 @@ Imperium.prototype.returnStageIPublicObjectives = function returnStageIPublicObj
       if (imperium_self.game.players[player-1].goods >= 5) { return 1; }
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      imperium_self.addMove("expend\t"+player+"\ttrade\t5");
+      mycallback(1);
     }
+
   };
   obj['pecuniary-diplomacy']			= {
     name 	: 	"Pecuniary Diplomacy" ,
@@ -3970,8 +4178,13 @@ Imperium.prototype.returnStageIPublicObjectives = function returnStageIPublicObj
 	return 1;
       }
       return 0;
-
-    }
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      imperium_self.playerSelectInfluence(8, function(success) {
+        mycallback(1);
+      });
+    },
+ 
   };
 
   return obj;
@@ -3993,7 +4206,15 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
     text	:	"Spend 10 trade goods when scoring" ,
     func	:	function(imperium_self, player) {
 
+      if (imperium_self.game.players[player-1].goods >= 10) { return 1; }
+      return 0;
+
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      imperium_self.addMove("expend\t"+player+"\ttrade\t10");
+      mycallback(1);
     }
+
   };
   obj['display-of-dominance']			= {
     name 	: 	"Display of Dominance" ,
@@ -4001,6 +4222,18 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
     text	:	"Control at least 1 planet in another player's home sector" ,
     func	:	function(imperium_self, player) {
 
+      let my_planets    = imperium_self.returnPlayerPlanetCards(player);
+      let their_planets = imperium_self.returnOtherPlayerHomeworldPlanets(player);
+
+      for (let i = 0; i < my_planets.length; i++) {
+	if (their_planets.includes(my_planets[i])) { return 1; }
+      }
+
+      return 0;
+
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
     }
   };
   obj['technological-empire']			= {
@@ -4021,7 +4254,11 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
 
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
     }
+
   };
   obj['galactic-currency']			= {
     name 	: 	"Establish Galactic Currency" ,
@@ -4035,7 +4272,13 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
       }
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      imperium_self.playerSelectResources(16, function(success) {
+        mycallback(1);
+      });
     }
+
   };
   obj['cultural-revolution']			= {
     name 	: 	"A Cultural Revolution" ,
@@ -4046,7 +4289,13 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
       if ((imperium_self.game.players[player-1].command_tokens + imperium_self.game.players[player-1].strategy_tokens) >= 6) { return 1; }
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      imperium_self.playerSelectStrategyAndCommandTokens(6, function(success) {
+        mycallback(1);
+      });
     }
+
   };
   obj['power-broken']			= {
     name 	: 	"Power Broken" ,
@@ -4060,7 +4309,13 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
       }
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      imperium_self.playerSelectInfluence(16, function(success) {
+        mycallback(1);
+      });
     }
+
   };
   obj['master-of-science']			= {
     name 	: 	"Master of Science" ,
@@ -4088,7 +4343,11 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
       if (criteria >= 4) { return 1; }
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
     }
+
   };
   obj['colonial-dominance']			= {
     name 	: 	"Colonial Dominance" ,
@@ -4096,8 +4355,23 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
     text	:	"Control 11 planets outside your home system" ,
     func	:	function(imperium_self, player) {
 
+      let homeplanets = imperium_self.returnPlayerHomeworldPlanets(player);
+      let planets = imperium_self.returnPlayerPlanetCards(player);
 
+      let total_non_home_planets = 0;
+
+      for (let i = 0; i < planets.length; i++) {
+	if (!homeplanets.includes(planets[i])) { total_non_home_planets++; }
+      }
+
+      if (total_non_home_planets >= 11) { return 1; }
+      return 0;
+
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
     }
+
   };
   obj['advanced-technologies']			= {
     name 	: 	"Advanced Technologies" ,
@@ -4113,7 +4387,11 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
       if (unit_upgrades >= 3) { return 1; }
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
     }
+
   };
   obj['imperial-unity']			= {
     name 	: 	"Imperial Unity" ,
@@ -4138,7 +4416,11 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
 
       return 0;
 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
     }
+
   };
 
   return obj;
@@ -4606,11 +4888,11 @@ Imperium.prototype.returnUnitCost = function returnUnitCost(name) {
 Imperium.prototype.returnFactions = function returnFactions() {
   var factions = {};
   factions['faction1'] = {
-    homeworld: "sector30",
+    homeworld: "homeworld1",
     name: "Faction 1"
   };
   factions['faction2'] = {
-    homeworld: "sector31",
+    homeworld: "homeworld2",
     name: "Faction 2"
   };
 /**
@@ -5131,6 +5413,29 @@ Imperium.prototype.endGame = function endGame(winner, method) {
 };
 
 
+Imperium.prototype.returnOtherPlayerHomeworldPlanets = function returnOtherPlayerHomeworldPlanets(player=this.game.player) {
+
+  let planets = [];
+
+  for (let i = 0; i < this.game.players.length; i++) {
+    if (this.game.player != (i+1)) {
+      let their_home_planets = this.returnPlayerHomeworldPlanets((i+1));
+      for (let z = 0; z < their_home_planets.length; z++) {
+        planets.push(their_home_planets);
+      }
+    }
+  }
+
+  return planets;
+
+}
+
+Imperium.prototype.returnPlayerHomeworldPlanets = function returnPlayerHomeworldPlanets(player=this.game.player) {
+
+  let home_sector = this.game.board[this.game.players[player-1].homeworld].tile;  // "sector";
+  return this.game.systems[home_sector].planets;
+
+}
 
 Imperium.prototype.returnPlayerUnexhaustedPlanetCards = function returnPlayerUnexhaustedPlanetCards(player=this.game.player) {
   return this.returnPlayerPlanetCards(player, 1);
@@ -5412,8 +5717,8 @@ Imperium.prototype.playStrategyCardPrimary = function playStrategyCardPrimary(pl
     this.game.state.round_scoring = 1;
 
     if (this.game.player == player) {
+      imperium_self.addMove("resolve\tstrategy");
       this.playerScoreVictoryPoints(function(vp, objective) {
-        imperium_self.addMove("resolve\tstrategy");
         imperium_self.addMove("strategy\t"+card+"\t"+player+"\t2\t"+player_confirmation_needed);
 	if (vp > 0) {
           imperium_self.addMove("score\t"+player+"\t"+vp+"\t"+objective);
@@ -5719,8 +6024,8 @@ alert("insufficient resources to build this tech... dying");
 
   if (card == "empire") {
 
+    imperium_self.addMove("resolve\tstrategy\t1");
     this.playerScoreVictoryPoints(function(vp, objective) {
-      imperium_self.addMove("resolve\tstrategy\t1");
       if (vp > 0) {
         imperium_self.addMove("score\t"+player+"\t"+vp+"\t"+objective);
       }
