@@ -3396,53 +3396,54 @@ Imperium.prototype.returnPlanets = function returnPlanets() {
   var planets = {};
 
   // regular planets
-  planets['planet1']	= { img : "/imperium/images/planet_card_template.png" , name : "Crystalis" , resources : 3 , influence : 0 , bonus : ""  }
-  planets['planet2']	= { img : "/imperium/images/planet_card_template.png" , name : "Troth" , resources : 2 , influence : 0 , bonus : ""  }
-  planets['planet3']	= { img : "/imperium/images/planet_card_template.png" , name : "Londrak" , resources : 1 , influence : 2 , bonus : ""  }
-  planets['planet4']	= { img : "/imperium/images/planet_card_template.png" , name : "Citadel" , resources : 0 , influence : 4 , bonus : "red"  }
-  planets['planet5']	= { img : "/imperium/images/planet_card_template.png" , name : "Belvedyr" , resources : 1 , influence : 2 , bonus : ""  }
-  planets['planet6']	= { img : "/imperium/images/planet_card_template.png" , name : "Shriva" , resources : 2 , influence : 1 , bonus : ""  }
-  planets['planet7']	= { img : "/imperium/images/planet_card_template.png" , name : "Zondor" , resources : 3 , influence : 1 , bonus : ""  }
-  planets['planet8']	= { img : "/imperium/images/planet_card_template.png" , name : "Calthrex" , resources : 2 , influence : 3 , bonus : ""  }
-  planets['planet9']	= { img : "/imperium/images/planet_card_template.png" , name : "Soundra IV" , resources : 1 , influence : 3 , bonus : ""  }
-  planets['planet10']	= { img : "/imperium/images/planet_card_template.png" , name : "Udon I" , resources : 1 , influence : 1 , bonus : "blue"  }
-  planets['planet11']	= { img : "/imperium/images/planet_card_template.png" , name : "Udon II" , resources : 1 , influence : 2 , bonus : ""  }
-  planets['planet12']	= { img : "/imperium/images/planet_card_template.png" , name : "New Jylanx" , resources : 2 , influence : 0 , bonus : ""  }
-  planets['planet13']	= { img : "/imperium/images/planet_card_template.png" , name : "Terra Core" , resources : 0 , influence : 2 , bonus : ""  }
-  planets['planet14']	= { img : "/imperium/images/planet_card_template.png" , name : "Granton Mex" , resources : 1 , influence : 0 , bonus : "yellow"  }
-  planets['planet15']	= { img : "/imperium/images/planet_card_template.png" , name : "Harkon Caledonia" , resources : 2 , influence : 1 , bonus : ""  }
-  planets['planet16']	= { img : "/imperium/images/planet_card_template.png" , name : "New Illia" , resources : 3 , influence : 1 , bonus : ""  }
-  planets['planet17']	= { img : "/imperium/images/planet_card_template.png" , name : "Lazak's Curse" , resources : 1 , influence : 3 , bonus : "red"  }
-  planets['planet18']	= { img : "/imperium/images/planet_card_template.png" , name : "Voluntra" , resources : 0 , influence : 2 , bonus : ""  }
-  planets['planet19']	= { img : "/imperium/images/planet_card_template.png" , name : "Xerxes IV" , resources : 3 , influence : 1 , bonus : ""  }
-  planets['planet20']	= { img : "/imperium/images/planet_card_template.png" , name : "Siren's End" , resources : 1 , influence : 1 , bonus : "green"  }
-  planets['planet21']	= { img : "/imperium/images/planet_card_template.png" , name : "Riftview" , resources : 2 , influence : 1 , bonus : ""  }
-  planets['planet22']	= { img : "/imperium/images/planet_card_template.png" , name : "Broughton" , resources : 1 , influence : 2 , bonus : ""  }
-  planets['planet23']	= { img : "/imperium/images/planet_card_template.png" , name : "Fjordra" , resources : 0 , influence : 3 , bonus : ""  }
-  planets['planet24']	= { img : "/imperium/images/planet_card_template.png" , name : "Nova Klondike" , resources : 2 , influence : 2 , bonus : ""  }
-  planets['planet25']	= { img : "/imperium/images/planet_card_template.png" , name : "Contouri I" , resources : 1 , influence : 1 , bonus : "green"  }
-  planets['planet26']	= { img : "/imperium/images/planet_card_template.png" , name : "Contouri II" , resources : 2 , influence : 0 , bonus : ""  }
-  planets['planet27']	= { img : "/imperium/images/planet_card_template.png" , name : "Hoth" , resources : 2 , influence : 2 , bonus : ""  }
-  planets['planet28']	= { img : "/imperium/images/planet_card_template.png" , name : "Unsulla" , resources : 1 , influence : 2 , bonus : ""  }
-
-  planets['planet29']	= { img : "/imperium/images/planet_card_template.png" , name : "Grox Towers" , resources : 1 , influence : 1 , bonus : "blue"  }
-  planets['planet30']	= { img : "/imperium/images/planet_card_template.png" , name : "Gravity's Edge" , resources : 2 , influence : 1 , bonus : ""  }
-  planets['planet31']	= { img : "/imperium/images/planet_card_template.png" , name : "Populax" , resources : 3 , influence : 2 , bonus : "yellow"  }
-  planets['planet32']	= { img : "/imperium/images/planet_card_template.png" , name : "Old Moltour" , resources : 2 , influence : 0 , bonus : ""  }
-  planets['planet33']	= { img : "/imperium/images/planet_card_template.png" , name : "New Byzantium" , resources : 3 , influence : 1 , bonus : ""  }
-  planets['planet34']	= { img : "/imperium/images/planet_card_template.png" , name : "Outerant" , resources : 1 , influence : 3 , bonus : ""  }
-  planets['planet35']	= { img : "/imperium/images/planet_card_template.png" , name : "Vespar" , resources : 2 , influence : 2 , bonus : ""  }
-  planets['planet36']	= { img : "/imperium/images/planet_card_template.png" , name : "Craw Populi" , resources : 1 , influence : 2 , bonus : ""  }
-  planets['planet37']	= { img : "/imperium/images/planet_card_template.png" , name : "Yssari II" , resources : 0 , influence : 1 , bonus : ""  }
-  planets['planet38']	= { img : "/imperium/images/planet_card_template.png" , name : "Hope's Lure" , resources : 3 , influence : 2 , bonus : ""  }
-  planets['planet39']	= { img : "/imperium/images/planet_card_template.png" , name : "Quandam" , resources : 1 , influence : 1 , bonus : ""  }
-  planets['planet40']	= { img : "/imperium/images/planet_card_template.png" , name : "Quandor" , resources : 2 , influence : 1 , bonus : ""  }
-  planets['planet41']	= { img : "/imperium/images/planet_card_template.png" , name : "Lorstruck" , resources : 1 , influence : 0 , bonus : ""  }
-  planets['planet42']	= { img : "/imperium/images/planet_card_template.png" , name : "Industryl" , resources : 3 , influence : 1 , bonus : ""  }
-  planets['planet43']	= { img : "/imperium/images/planet_card_template.png" , name : "Mechanex" , resources : 1 , influence : 0 , bonus : ""  }
-  planets['planet44']	= { img : "/imperium/images/planet_card_template.png" , name : "Hearthslough" , resources : 3 , influence : 0 , bonus : ""  }
-  planets['planet45']	= { img : "/imperium/images/planet_card_template.png" , name : "Incarth" , resources : 2 , influence : 0 , bonus : ""  }
-  planets['planet46']	= { img : "/imperium/images/planet_card_template.png" , name : "Aandor" , resources : 2 , influence : 1 , bonus : ""  }
+  planets['planet1']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Crystalis" , resources : 3 , influence : 0 , bonus : ""  }
+  planets['planet2']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Troth" , resources : 2 , influence : 0 , bonus : ""  }
+  planets['planet3']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Londrak" , resources : 1 , influence : 2 , bonus : ""  }
+  planets['planet4']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Citadel" , resources : 0 , influence : 4 , bonus : "red"  }
+  planets['planet5']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Belvedyr" , resources : 1 , influence : 2 , bonus : ""  }
+  planets['planet6']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Shriva" , resources : 2 , influence : 1 , bonus : ""  }
+  planets['planet7']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Zondor" , resources : 3 , influence : 1 , bonus : ""  }
+  planets['planet8']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Calthrex" , resources : 2 , influence : 3 , bonus : ""  }
+  planets['planet9']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Soundra IV" , resources : 1 , influence : 3 , bonus : ""  }
+  planets['planet10']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Udon I" , resources : 1 , influence : 1 , bonus : "blue"  }
+  planets['planet11']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Udon II" , resources : 1 , influence : 2 , bonus : ""  }
+  planets['planet12']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "New Jylanx" , resources : 2 , influence : 0 , bonus : ""  }
+  planets['planet13']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Terra Core" , resources : 0 , influence : 2 , bonus : ""  }
+  planets['planet14']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Olympia" , resources : 1 , influence : 2 , bonus : ""  }
+  planets['planet15']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Granton Mex" , resources : 1 , influence : 0 , bonus : "yellow"  }
+  planets['planet16']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Harkon Caledonia" , resources : 2 , influence : 1 , bonus : ""  }
+  planets['planet17']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "New Illia" , resources : 3 , influence : 1 , bonus : ""  }
+  planets['planet18']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Lazak's Curse" , resources : 1 , influence : 3 , bonus : "red"  }
+  planets['planet19']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Voluntra" , resources : 0 , influence : 2 , bonus : ""  }
+  planets['planet20']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Xerxes IV" , resources : 3 , influence : 1 , bonus : ""  }
+  planets['planet21']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Siren's End" , resources : 1 , influence : 1 , bonus : "green"  }
+  planets['planet22']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Riftview" , resources : 2 , influence : 1 , bonus : ""  }
+  planets['planet23']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Broughton" , resources : 1 , influence : 2 , bonus : ""  }
+  planets['planet24']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Fjordra" , resources : 0 , influence : 3 , bonus : ""  }
+  planets['planet25']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Singharta" , resources : 1 , influence : 1 , bonus : ""  }
+  planets['planet26']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Nova Klondike" , resources : 2 , influence : 2 , bonus : ""  }
+  planets['planet27']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Contouri I" , resources : 1 , influence : 1 , bonus : "green"  }
+  planets['planet28']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Contouri II" , resources : 2 , influence : 0 , bonus : ""  }
+  planets['planet29']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Hoth" , resources : 2 , influence : 2 , bonus : ""  }
+  planets['planet29']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Unsulla" , resources : 1 , influence : 2 , bonus : ""  }
+  planets['planet30']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Grox Towers" , resources : 1 , influence : 1 , bonus : "blue"  }
+  planets['planet30']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Gravity's Edge" , resources : 2 , influence : 1 , bonus : ""  }
+  planets['planet31']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Populax" , resources : 3 , influence : 2 , bonus : "yellow"  }
+  planets['planet32']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Old Moltour" , resources : 2 , influence : 0 , bonus : ""  }
+  planets['planet33']	= { type : "" , img : "/imperium/images/planet_card_template.png" , name : "New Byzantium" , resources : 1 , influence : 6 , bonus : ""  }
+  planets['planet34']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Outerant" , resources : 1 , influence : 3 , bonus : ""  }
+  planets['planet35']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Vespar" , resources : 2 , influence : 2 , bonus : ""  }
+  planets['planet36']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Craw Populi" , resources : 1 , influence : 2 , bonus : ""  }
+  planets['planet37']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Yssari II" , resources : 0 , influence : 1 , bonus : ""  }
+  planets['planet38']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Hope's Lure" , resources : 3 , influence : 2 , bonus : ""  }
+  planets['planet39']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Quandam" , resources : 1 , influence : 1 , bonus : ""  }
+  planets['planet40']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Quandor" , resources : 2 , influence : 1 , bonus : ""  }
+  planets['planet41']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Lorstruck" , resources : 1 , influence : 0 , bonus : ""  }
+  planets['planet42']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Industryl" , resources : 3 , influence : 1 , bonus : ""  }
+  planets['planet43']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Mechanex" , resources : 1 , influence : 0 , bonus : ""  }
+  planets['planet44']	= { type : "industrial" , img : "/imperium/images/planet_card_template.png" , name : "Hearthslough" , resources : 3 , influence : 0 , bonus : ""  }
+  planets['planet45']	= { type : "hazardous" , img : "/imperium/images/planet_card_template.png" , name : "Incarth" , resources : 2 , influence : 0 , bonus : ""  }
+  planets['planet46']	= { type : "cultural" , img : "/imperium/images/planet_card_template.png" , name : "Aandor" , resources : 2 , influence : 1 , bonus : ""  }
 
   for (var i in planets) {
     planets[i].exhausted = 0;
@@ -3451,11 +3452,6 @@ Imperium.prototype.returnPlanets = function returnPlanets() {
     for (let j = 0; j < this.totalPlayers; j++) {
       planets[i].units[j] = [];
     }
-
-    //planets[i].units[1] = [];
-    //planets[i].units[1].push(this.returnUnit("infantry"));
-    //planets[i].units[1].push(this.returnUnit("infantry"));
-    //planets[i].owner = 2;
   }
 
   return planets;
@@ -3834,46 +3830,148 @@ Imperium.prototype.returnStageIPublicObjectives = function returnStageIPublicObj
     name 	: 	"Planetary Unity" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Control four planets of the same planet type" ,
+    func	:	function(imperium_self, player) {
+
+      let planets = imperium_self.returnPlayerPlanetCards(player);
+      let success = 0;
+      let types   = [];
+      for (let i = 0; i < 3; i++) { types[i] = 0; }
+
+      for (let i = 0; i < planets.length; i++) {
+        if (imperium_self.game.planets[planets[i]].type == "hazardous") { types[0]++; }
+        if (imperium_self.game.planets[planets[i]].type == "industrial") { types[1]++; }
+        if (imperium_self.game.planets[planets[i]].type == "cultural") { types[2]++; }
+      }
+
+      for (let i = 0; i < 3; i++) {
+	if (types[i] >= 4) { return 1; }
+      }
+
+      return 0;
+
+    }
   };
   obj['forge-of-war']				= {
     name 	: 	"Forge of War" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Research 2 unit upgrade technologies" ,
+    func	:	function(imperium_self, player) {
+
+      let tech = imperium_self.game.players[player-1].tech;
+      let unit_upgrades = 0;
+      for (let i = 0; i < tech.length; i++) {
+	if (imperium_self.game.tech[tech[i]].unit == 1) { unit_upgrades++; }
+      }
+      if (unit_upgrades >= 2) { return 1; }
+      return 0;
+
+    }
   };
   obj['diversified-research']			= {
     name 	: 	"Diversified Research" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Research 2 technologies in two different color paths" ,
+    func	:	function(imperium_self, player) {
+
+      let tech = imperium_self.game.players[player-1].tech;
+      let colortech = [];
+      for (let i = 0; i < 4; i++) { colortech[i] = 0; }
+
+      for (let i = 0; i < tech.length; i++) {
+	if (imperium_self.game.tech[tech[i]].color === "green") { colortech[0]++; }
+	if (imperium_self.game.tech[tech[i]].color === "red") { colortech[1]++; }
+	if (imperium_self.game.tech[tech[i]].color === "yellow") { colortech[2]++; }
+	if (imperium_self.game.tech[tech[i]].color === "blue") { colortech[3]++; }
+      }
+
+      let criteria = 0;
+
+      for (let i = 0; i < 4; i++) {
+        if (colortech[i] >= 2) { criteria++; }
+      }
+
+      if (criteria >= 2) { return 1; }
+      return 0;
+
+    }
   };
   obj['mining-conglomerate']			= {
     name 	: 	"Mining Conglomerate" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Spend eight resources when scoring" ,
+    func	:	function(imperium_self, player) {
+
+      let ar = imperium_self.returnAvailableResources(player);
+      if (ar > 8) {
+	return 1;
+      }
+      return 0;
+
+    }
   };
   obj['colonization']				= {
     name 	: 	"Colonization" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Control six planets outside your home system" ,
+    func	:	function(imperium_self, player) {
+
+    }
   };
   obj['conquest-of-science']			= {
     name 	: 	"Conquest of Science" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Control 3 planets with tech specialities" ,
+    func	:	function(imperium_self, player) {
+
+      let planets = imperium_self.returnPlayerPlanetCards(player);
+      let specialities = 0;
+      for (let i = 0; i < planets.length; i++) {
+        if (imperium_self.game.planets[planets[i]].bonus != "") { specialities++; }
+      }
+
+      if (specialities >= 3) {
+	return 1;
+      }
+
+      return 0;
+
+    }
   };
   obj['grand-gesture']				= {
     name 	: 	"A Grand Gesture" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Spend 3 command or strategy tokens when scoring" ,
+    func	:	function(imperium_self, player) {
+
+      if ((imperium_self.game.players[player-1].command_tokens + imperium_self.game.players[player-1].strategy_tokens) >= 3) { return 1; }
+      return 0;
+
+    }
   };
   obj['trade-outposts']				= {
     name 	: 	"Establish Trade Outposts" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Spend 5 trade goods when scoring" ,
+    func	:	function(imperium_self, player) {
+
+      if (imperium_self.game.players[player-1].goods >= 5) { return 1; }
+      return 0;
+
+    }
   };
   obj['pecuniary-diplomacy']			= {
     name 	: 	"Pecuniary Diplomacy" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Spend 8 influence when scoring" ,
+    func	:	function(imperium_self, player) {
+
+      let ar = imperium_self.returnAvailableInfluence(player);
+      if (ar > 7) {
+	return 1;
+      }
+      return 0;
+
+    }
   };
 
   return obj;
@@ -3893,51 +3991,154 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
     name 	: 	"Master of Commerce" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Spend 10 trade goods when scoring" ,
+    func	:	function(imperium_self, player) {
+
+    }
   };
   obj['display-of-dominance']			= {
     name 	: 	"Display of Dominance" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Control at least 1 planet in another player's home sector" ,
+    func	:	function(imperium_self, player) {
+
+    }
   };
   obj['technological-empire']			= {
     name 	: 	"Technological Empire" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Control 5 planets with tech bonuses" ,
+    func	:	function(imperium_self, player) {
+
+      let planets = imperium_self.returnPlayerPlanetCards(player);
+      let specialities = 0;
+      for (let i = 0; i < planets.length; i++) {
+        if (imperium_self.game.planets[planets[i]].bonus != "") { specialities++; }
+      }
+
+      if (specialities >= 5) {
+	return 1;
+      }
+
+      return 0;
+
+    }
   };
   obj['galactic-currency']			= {
     name 	: 	"Establish Galactic Currency" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Spend 16 resources when scoring" ,
+    func	:	function(imperium_self, player) {
+
+      let ar = impernum_self.returnAvailableResources(player);
+      if (ar > 15) {
+	return 1;
+      }
+      return 0;
+
+    }
   };
   obj['cultural-revolution']			= {
     name 	: 	"A Cultural Revolution" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Spend 6 command or strategy tokens when scoring" ,
+    func	:	function(imperium_self, player) {
+
+      if ((imperium_self.game.players[player-1].command_tokens + imperium_self.game.players[player-1].strategy_tokens) >= 6) { return 1; }
+      return 0;
+
+    }
   };
   obj['power-broken']			= {
     name 	: 	"Power Broken" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Spend 16 influence when scoring" ,
+    func	:	function(imperium_self, player) {
+
+      let ar = impernum_self.returnAvailableInfluence(player);
+      if (ar > 15) {
+	return 1;
+      }
+      return 0;
+
+    }
   };
   obj['master-of-science']			= {
     name 	: 	"Master of Science" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Own 2 tech upgrades in each of 4 tech color paths" ,
+    func	:	function(imperium_self, player) {
+
+      let tech = imperium_self.game.players[player-1].tech;
+      let colortech = [];
+      for (let i = 0; i < 4; i++) { colortech[i] = 0; }
+
+      for (let i = 0; i < tech.length; i++) {
+	if (imperium_self.game.tech[tech[i]].color === "green") { colortech[0]++; }
+	if (imperium_self.game.tech[tech[i]].color === "red") { colortech[1]++; }
+	if (imperium_self.game.tech[tech[i]].color === "yellow") { colortech[2]++; }
+	if (imperium_self.game.tech[tech[i]].color === "blue") { colortech[3]++; }
+      }
+
+      let criteria = 0;
+
+      for (let i = 0; i < 4; i++) {
+        if (colortech[i] >= 2) { criteria++; }
+      }
+
+      if (criteria >= 4) { return 1; }
+      return 0;
+
+    }
   };
   obj['colonial-dominance']			= {
     name 	: 	"Colonial Dominance" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Control 11 planets outside your home system" ,
+    func	:	function(imperium_self, player) {
+
+
+    }
   };
   obj['advanced-technologies']			= {
     name 	: 	"Advanced Technologies" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Research 3 unit upgrade technologies" ,
+    func	:	function(imperium_self, player) {
+
+      let tech = imperium_self.game.players[player-1].tech;
+      let unit_upgrades = 0;
+      for (let i = 0; i < tech.length; i++) {
+	if (imperium_self.game.tech[tech[i]].unit == 1) { unit_upgrades++; }
+      }
+      if (unit_upgrades >= 3) { return 1; }
+      return 0;
+
+    }
   };
   obj['imperial-unity']			= {
     name 	: 	"Imperial Unity" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Control 6 planets of the same planet type" ,
+    func	:	function(imperium_self, player) {
+
+      let ar = imperium_self.returnPlayerPlanetCards(player);
+      let success = 0;
+      let types   = [];
+      for (let i = 0; i < 3; i++) { types[i] = 0; }
+
+      for (let i = 0; i < planets.length; i++) {
+        if (planets[i].type == "hazardous") { types[0]++; }
+        if (planets[i].type == "industrial") { types[1]++; }
+        if (planets[i].type == "cultural") { types[2]++; }
+      }
+
+      for (let i = 0; i < 3; i++) {
+	if (types[i] >= 6) { return 1; }
+      }
+
+      return 0;
+
+    }
   };
 
   return obj;
@@ -3961,24 +4162,28 @@ Imperium.prototype.returnTechnologyTree = function returnTechnologyTree() {
     name 	: 	"Neural Implants" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"green" ,
+    unit	:	0 ,
     prereqs	:	[]
   };
   tech['resuscitation-pods']			= {
     name 	: 	"Resuscitation Pods" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"green" ,
+    unit	:	0 ,
     prereqs	:	['green']
   };
   tech['biotic-enhancements']			= {
     name 	: 	"Biotic Enhancements" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"green" ,
+    unit	:	0 ,
     prereqs	:	['green','green']
   };
   tech['viral-plasma']			= {
     name 	: 	"X-91 Viral Plasma" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"green" ,
+    unit	:	0 ,
     prereqs	:	['green','green','green']
   };
 
@@ -3986,24 +4191,28 @@ Imperium.prototype.returnTechnologyTree = function returnTechnologyTree() {
     name 	: 	"Electron Shielding" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"blue" ,
+    unit	:	0 ,
     prereqs	:	[]
   };
   tech['slingshot-drive']			= {
     name 	: 	"Slingshot Drive" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"blue" ,
+    unit	:	0 ,
     prereqs	:	['blue']
   };
   tech['fleet-ansible']			= {
     name 	: 	"Fleet Ansible" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"blue" ,
+    unit	:	0 ,
     prereqs	:	['blue','blue']
   };
   tech['stealth-cloaking']			= {
     name 	: 	"Stealth Cloaking" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"blue" ,
+    unit	:	0 ,
     prereqs	:	['blue','blue','blue']
   };
 
@@ -4011,24 +4220,28 @@ Imperium.prototype.returnTechnologyTree = function returnTechnologyTree() {
     name 	: 	"Waste Recycling" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"yellow" ,
+    unit	:	0 ,
     prereqs	:	[]
   };
   tech['laser-targeting']			= {
     name 	: 	"Laser Targeting" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"yellow" ,
+    unit	:	0 ,
     prereqs	:	['yellow']
   };
   tech['deep-space-reanimatronics']			= {
     name 	: 	"Deep Space Reanimatronics" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"yellow" ,
+    unit	:	0 ,
     prereqs	:	['yellow','yellow']
   };
   tech['frontline-assembly']			= {
     name 	: 	"Frontline Assembly" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"yellow" ,
+    unit	:	0 ,
     prereqs	:	['yellow','yellow','yellow']
   };
 
@@ -4036,70 +4249,92 @@ Imperium.prototype.returnTechnologyTree = function returnTechnologyTree() {
     name 	: 	"Plasma Clusters" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"red" ,
+    unit	:	0 ,
     prereqs	:	[]
   };
   tech['stasis-fields']			= {
     name 	: 	"Stasis Fields" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"red" ,
+    unit	:	0 ,
     prereqs	:	['red']
   };
   tech['titanium-shielding']			= {
     name 	: 	"Titanium Shielding" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"red" ,
+    unit	:	0 ,
     prereqs	:	['red','red']
   };
   tech['chain-shot']			= {
     name 	: 	"Chain Shot" ,
     img		:	"/imperium/images/card_template.jpg" , 
     color	:	"red" ,
+    unit	:	0 ,
     prereqs	:	['red','red','red']
   };
 
   tech['fighter-ii']			= {
     name 	: 	"Fighter II" ,
     img		:	"/imperium/images/card_template.jpg" , 
+    color	:	"" ,
+    unit	:	1 ,
     prereqs	:	['green','blue']
   };
   tech['infantry-ii']			= {
     name 	: 	"Infantry II" ,
     img		:	"/imperium/images/card_template.jpg" , 
+    color	:	"" ,
+    unit	:	1 ,
     prereqs	:	['green','green']
   };
   tech['carrier-ii']			= {
     name 	: 	"Carrier II" ,
     img		:	"/imperium/images/card_template.jpg" , 
+    color	:	"" ,
+    unit	:	1 ,
     prereqs	:	['green','green','blue','blue']
   };
   tech['dreadnaught-ii']			= {
     name 	: 	"Dreadnaught II" ,
     img		:	"/imperium/images/card_template.jpg" , 
+    color	:	"" ,
+    unit	:	1 ,
     prereqs	:	['blue','blue','yellow']
   };
   tech['cruiser-ii']			= {
     name 	: 	"Cruiser II" ,
     img		:	"/imperium/images/card_template.jpg" , 
+    color	:	"" ,
+    unit	:	1 ,
     prereqs	:	['green','yellow','red']
   };
   tech['spacedock-ii']			= {
     name 	: 	"Space Dock II" ,
     img		:	"/imperium/images/card_template.jpg" , 
+    color	:	"" ,
+    unit	:	1 ,
     prereqs	:	['yellow','yellow']
   };
   tech['destroyer-ii']			= {
     name 	: 	"Destroyer II" ,
     img		:	"/imperium/images/card_template.jpg" , 
+    color	:	"" ,
+    unit	:	1 ,
     prereqs	:	['red','red']
   };
   tech['pds-ii']			= {
     name 	: 	"PDS II" ,
     img		:	"/imperium/images/card_template.jpg" , 
+    color	:	"" ,
+    unit	:	1 ,
     prereqs	:	['yellow','red']
   };
   tech['war-sun']			= {
     name 	: 	"War Sun" ,
     img		:	"/imperium/images/card_template.jpg" , 
+    color	:	"" ,
+    unit	:	1 ,
     prereqs	:	['yellow','red','red','red']
   };
 
