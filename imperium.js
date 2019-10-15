@@ -445,6 +445,9 @@ Imperium.prototype.initializeGame = async function initializeGame(game_id) {
     this.game.queue.push("SHUFFLE\t4");
     this.game.queue.push("SHUFFLE\t5");
     this.game.queue.push("SHUFFLE\t6");
+    for (let i = 0; i < this.game.players.length; i++) {
+      this.game.queue.push("DEAL\t6\t"+(i+1)+"\t2");
+    }
     this.game.queue.push("POOL\t3");   // stage ii objectives
     this.game.queue.push("POOL\t2");   // stage i objectives
     this.game.queue.push("POOL\t1");   // agenda cards
@@ -539,11 +542,9 @@ Imperium.prototype.handleGame = function handleGame(msg=null) {
       if (mv[0] == "setinitiativeorder") {
 
 	let initiative_order = this.returnInitiativeOrder();
-
-console.log("\n\n\nINITIATIVE ORDER: " + initiative_order);
 	this.game.queue.push("resolve\tsetinitiativeorder");
 
-	for (let i = initiative_order.length-1; i >= 0; i--) {
+	for (let i = 0; i < initiative_order.length; i++) {
 	  if (this.game.players[initiative_order[i]-1].passed == 0) {
 	    this.game.queue.push("play\t"+initiative_order[i]);
 	  }
@@ -675,9 +676,6 @@ console.log("\n\n\nINITIATIVE ORDER: " + initiative_order);
         for (i = 0; i < this.game.pool[1].hand.length; i++) {
           this.game.state.stage_ii_objectives.push(this.game.pool[1].hand[i]);	
 	}
-
-console.log("UPDATED OBJECTIVES I " + JSON.stringify(this.game.state.stage_i_objectives));
-console.log("UPDATED OBJECTIVES II " + JSON.stringify(this.game.state.stage_ii_objectives));
 
 	this.game.queue.splice(qe, 1);
 	return 1;
@@ -1317,6 +1315,8 @@ Imperium.prototype.playerBuyTokens = function playerBuyTokens() {
 
 
 
+
+
 Imperium.prototype.playerBuyActionCards = function playerBuyActionCards() {
 
   let imperium_self = this;
@@ -1463,26 +1463,28 @@ Imperium.prototype.canPlayerScoreVictoryPoints = function canPlayerScoreVictoryP
 }
 Imperium.prototype.playerScoreVictoryPoints = function playerScoreVictoryPoints(mycallback) {
 
+  let imperium_self = this;
+
   let html = 'Do you wish to score any victory points? <p></p><ul>';
 
   // Stage I Public Objectives
-  for (var i in this.game.deck[3].cards) {
-    if (this.canPlayerScoreVictoryPoints(this.game.player, i, 1)) {
-      html += '1 VP Public Objective: <li class="option stage1" id="'+i+'">'+this.game.deck[3].cards[i].name+'</li>';
+  for (let i = 0; i < this.game.state.stage_i_objectives.length; i++) {
+    if (this.canPlayerScoreVictoryPoints(this.game.player, this.game.state.stage_i_objectives[i], 1)) {
+      html += '1 VP Public Objective: <li class="option stage1" id="'+i+'">'+this.game.deck[3].cards[this.game.state.stage_i_objectives[i]].name+'</li>';
     }
   }
 
   // Stage II Public Objectives
-  for (var i in this.game.deck[4].cards) {
-    if (this.canPlayerScoreVictoryPoints(this.game.player, i, 2)) {
-      html += '2 VP Public Objective: <li class="option stage2" id="'+i+'">'+this.game.deck[4].cards[i].name+'</li>';
+  for (let i = 0; i < this.game.state.stage_ii_objectives.length; i++) {
+    if (this.canPlayerScoreVictoryPoints(this.game.player, this.game.state.stage_ii_objectives[i], 2)) {
+      html += '2 VP Public Objective: <li class="option stage2" id="'+i+'">'+this.game.deck[4].cards[this.game.state.stage_ii_objectives[i]].name+'</li>';
     }
   }
 
   // Secret Objectives
-  for (var i in this.game.deck[5].cards) {
-    if (this.canPlayerScoreVictoryPoints(this.game.player, i, 3)) {
-      html += '1 VP Secret Objective: <li class="option secret3" id="'+i+'">'+this.game.deck[5].cards[i].name+'</li>';
+  for (let i = 0 ; i < this.game.deck[5].hand.length; i++) {
+    if (this.canPlayerScoreVictoryPoints(this.game.player, this.game.deck[5].hand[i], 3)) {
+      html += '1 VP Secret Objective: <li class="option secret3" id="'+i+'">'+this.game.deck[5].cards[this.game.deck[5].hand[i]].name+'</li>';
     }
   }
 
@@ -3863,121 +3865,241 @@ Imperium.prototype.returnSecretObjectives = function returnSecretObjectives() {
     name 	: 	"Military Catastrophe" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Destroy the flagship of another player" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['nuke-them-from-orbit']			= {
     name 	: 	"Nuke them from Orbit" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Destroy a player's last infantry using bombardment" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['anti-imperialism']			= {
     name 	: 	"Anti-Imperialism" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Achieve victory in combat with a player with the most VP" ,
-    type	: 	"instant"
+    type	: 	"instant" , 
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['close-the-trap']			= {
     name 	: 	"Close the Trap" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Destroy another player's last ship in a system using a PDS" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['flagship-dominance']			= {
     name 	: 	"Launch Flagship" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Achieve victory in a space combat in a system containing your flagship. Your flagship must survive this combat" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['faction-technologies']			= {
     name 	: 	"Faction Technologies" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Research 2 faction technologies" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['wormhole-administrator']			= {
     name 	: 	"Wormhole Administrator" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Have at least 1 ship in systems containing alpha and beta wormholes respectively" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['galactic-observer']			= {
     name 	: 	"Galactic Observer" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Have at least 1 ship in 6 different sectors" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['establish-a-blockade']			= {
     name 	: 	"Establish a Blockade" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Have at least 1 ship in the same sector as an opponent's space dock" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['ion-cannon-master']			= {
     name 	: 	"Master of the Ion Cannon" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Have at least 4 PDS units in play" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['cultural-diplomacy']			= {
     name 	: 	"Cultural Diplomacy" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Control at least 4 cultural planets" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['act-of-espionage']			= {
     name 	: 	"Act of Espionage" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Discard 5 action cards from your hand" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['war-engine']			= {
     name 	: 	"Engine of War" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Have three space docks in play" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['fleet-of-terror']			= {
     name 	: 	"Fleet of Terror" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Have 5 dreadnaughts in play" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['space-to-breathe']			= {
     name 	: 	"Space to Breathe" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Have at least 1 ship in 3 systems with no planets" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['ascendant-technocracy']			= {
     name 	: 	"Ascendant Technocracy" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Research 4 tech upgrades on the same color path" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['penal-colonies']			= {
     name 	: 	"Penal Colonies" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Control four planets with hazardous conditions" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['master-of-production']			= {
     name 	: 	"Master of Production" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Control four planets with industrial civilizations" ,
-    type	: 	"instant"
+    type	: 	"instant" ,
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['occupy-new-byzantium']			= {
     name 	: 	"Occupy New Byzantium" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Control New Byzantium and have at least 3 ships protecting the sector" ,
-    type	: 	"instant"
+    type	: 	"instant",
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
   secret['cast-a-long-shadow']			= {
     name 	: 	"Cast a Long Shadow" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
     text	:	"Have at least 1 ship in a system adjacent to an opponents homeworld" ,
-    type	: 	"instant"
+    type	: 	"instant",
+    func	:	function(imperium_self, player) {
+      return 1;
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
   };
 
   return secret;
@@ -3993,6 +4115,19 @@ Imperium.prototype.returnStageIPublicObjectives = function returnStageIPublicObj
 
   let obj = {};
 
+  obj['manage-to-breathe']			= {
+    name 	: 	"Figure out Breathing" ,
+    img		:	"/imperium/images/objective_card_1_template.png" ,
+    text	:	"Just score this for free..." ,
+    func	:	function(imperium_self, player) {
+
+      return 1;
+ 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
+  };
   obj['planetary-unity']			= {
     name 	: 	"Planetary Unity" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
@@ -4200,6 +4335,19 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
 
   let obj = {};
 
+  obj['manage-two-breathe']			= {
+    name 	: 	"Figure outwo Breathing" ,
+    img		:	"/imperium/images/objective_card_1_template.png" ,
+    text	:	"Just score this two VP for free..." ,
+    func	:	function(imperium_self, player) {
+
+      return 1;
+ 
+    },
+    post	:	function(imperium_self, player, mycallback) {
+      mycallback(1);
+    }
+  };
   obj['master-of-commerce']			= {
     name 	: 	"Master of Commerce" ,
     img		:	"/imperium/images/objective_card_1_template.png" ,
@@ -4266,7 +4414,7 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
     text	:	"Spend 16 resources when scoring" ,
     func	:	function(imperium_self, player) {
 
-      let ar = impernum_self.returnAvailableResources(player);
+      let ar = imperium_self.returnAvailableResources(player);
       if (ar > 15) {
 	return 1;
       }
@@ -4303,7 +4451,7 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
     text	:	"Spend 16 influence when scoring" ,
     func	:	function(imperium_self, player) {
 
-      let ar = impernum_self.returnAvailableInfluence(player);
+      let ar = imperium_self.returnAvailableInfluence(player);
       if (ar > 15) {
 	return 1;
       }
@@ -4399,15 +4547,15 @@ Imperium.prototype.returnStageIIPublicObjectives = function returnStageIIPublicO
     text	:	"Control 6 planets of the same planet type" ,
     func	:	function(imperium_self, player) {
 
-      let ar = imperium_self.returnPlayerPlanetCards(player);
+      let planets = imperium_self.returnPlayerPlanetCards(player);
       let success = 0;
       let types   = [];
       for (let i = 0; i < 3; i++) { types[i] = 0; }
 
       for (let i = 0; i < planets.length; i++) {
-        if (planets[i].type == "hazardous") { types[0]++; }
-        if (planets[i].type == "industrial") { types[1]++; }
-        if (planets[i].type == "cultural") { types[2]++; }
+        if (imperium_self.game.planets[planets[i]].type == "hazardous") { types[0]++; }
+        if (imperium_self.game.planets[planets[i]].type == "industrial") { types[1]++; }
+        if (imperium_self.game.planets[planets[i]].type == "cultural") { types[2]++; }
       }
 
       for (let i = 0; i < 3; i++) {
@@ -4853,7 +5001,9 @@ Imperium.prototype.returnPlayers = function returnPlayers(num=0) {
     players[i].strategy = [];
 
     // scored objectives
-    players[i].objectives = [];
+    players[i].scored_objectives = [];
+
+    players[i].secret_objectives = [];
 
   }
 
@@ -5430,11 +5580,10 @@ Imperium.prototype.returnOtherPlayerHomeworldPlanets = function returnOtherPlaye
 
 }
 
-Imperium.prototype.returnPlayerHomeworldPlanets = function returnPlayerHomeworldPlanets(player=this.game.player) {
 
+Imperium.prototype.returnPlayerHomeworldPlanets = function returnPlayerHomeworldPlanets(player=this.game.player) {
   let home_sector = this.game.board[this.game.players[player-1].homeworld].tile;  // "sector";
   return this.game.systems[home_sector].planets;
-
 }
 
 Imperium.prototype.returnPlayerUnexhaustedPlanetCards = function returnPlayerUnexhaustedPlanetCards(player=this.game.player) {
