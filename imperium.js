@@ -886,10 +886,10 @@ Imperium.prototype.handleGame = function handleGame(msg=null) {
             this.loadUnitByJSONOntoShipByJSON(player, sector, shipjson, unitjson);
           } else {
             if (source == "space") {
-              //this.unloadUnitByJSONFromShip(player, sector, ship_idx, unitjson);
-              //this.loadUnitByJSONOntoShipByJSON(player, sector, shipjson, unitjson);
+              this.unloadUnitByJSONFromShip(player, sector, ship_idx, unitjson);
+              this.loadUnitByJSONOntoShipByJSON(player, sector, shipjson, unitjson);
             } else {
-              //this.loadUnitByJSONOntoShipByJSON(player, sector, shipjson, unitjson);
+              this.loadUnitByJSONOntoShipByJSON(player, sector, shipjson, unitjson);
             }
           }
         }
@@ -1075,15 +1075,15 @@ Imperium.prototype.handleGame = function handleGame(msg=null) {
 	//
 	// move any ships
 	//
+console.log(this.game.player + " --- " + player + " --- " + player_moves + " --- " + sector_from + " --- " + sector_to);
+
 	if (this.game.player != player || player_moves == 1) {
+console.log("removing: " + shipjson);
 	  this.removeSpaceUnitByJSON(player, sector_from, shipjson);
           this.addSpaceUnitByJSON(player, sector_to, shipjson);
 	}
 
-	//
-	// handle any conflict
-	//
-	this.invadeSector(player, sector_to);
+  	this.invadeSector(player, sector_to);
 
 	this.updateSectorGraphics(sector_from);
 	this.updateSectorGraphics(sector_to);
@@ -2200,7 +2200,7 @@ Imperium.prototype.playerSelectUnitsToMove = function playerSelectUnitsToMove(de
 
 	} else {
 
-	  if (obj.ships_and_sectors[i].ships[ii].move - (obj.ships_and_sectors[i].ships[ii].adjusted_distance + spent_distance_boost) >= 0) {
+	  if (obj.ships_and_sectors[i].ships[ii].move - (obj.ships_and_sectors[i].adjusted_distance[ii] + spent_distance_boost) >= 0) {
             html += '<li id="sector_'+i+'_'+ii+'" class="option">'+obj.ships_and_sectors[i].ships[ii].name+'</li>';
 	  }
 	}
@@ -2268,6 +2268,7 @@ Imperium.prototype.playerSelectUnitsToMove = function playerSelectUnitsToMove(de
 	obj.ship_move_bonus--;
 
       }
+
 
       obj.stuff_to_move.push(x);
 
@@ -2550,7 +2551,7 @@ Imperium.prototype.playerInvadePlanet = function playerInvadePlanet(player, sect
  	  alert("You cannot attack with forces you do not have available."); return;
         }
 
-	let unitjson = JSON.stringify(imperium_self.returnUnit("infantry"));
+	let unitjson = JSON.stringify(imperium_self.returnUnit("infantry", this.game.player));
 
         let landing = {};
             landing.sector = sector;
@@ -2766,7 +2767,7 @@ Imperium.prototype.addPlanetaryUnitByJSON = function addSpaceUnitByJSON(player, 
 };
 Imperium.prototype.addSpaceUnit = function addSpaceUnit(player, sector, unitname) {
   let sys = this.returnSystemAndPlanets(sector);
-  let unit_to_add = this.returnUnit(unitname);
+  let unit_to_add = this.returnUnit(unitname, player);
   sys.s.units[player - 1].push(unit_to_add);
   this.saveSystemAndPlanets(sys);
   return JSON.stringify(unit_to_add);
@@ -2797,12 +2798,18 @@ Imperium.prototype.removeSpaceUnit = function removeSpaceUnit(player, sector, un
 Imperium.prototype.removeSpaceUnitByJSON = function removeSpaceUnitByJSON(player, sector, unitjson) {
   let sys = this.returnSystemAndPlanets(sector);
   for (let i = 0; i < sys.s.units[player - 1].length; i++) {
+console.log("TESTING: " + sys.s.units[player - 1][i].name + " ------ " + JSON.stringify(sys.s.units[player-1][i]));
+
     if (JSON.stringify(sys.s.units[player - 1][i]) === unitjson) {
+console.log("FOUND AND REMOVED UNIT: " + sys.s.units[player-1][i].name);
       sys.s.units[player - 1].splice(i, 1);
       this.saveSystemAndPlanets(sys);
       return unitjson;
     }
   }
+console.log("DID NOT REMOVE UNIT!");
+console.log(unitjson);
+
 };
 
 
@@ -2811,7 +2818,7 @@ Imperium.prototype.loadUnitOntoPlanet = function loadUnitOntoPlanet(player, sect
 console.log("LOAD UNIT BY JSON Onto Planet in Sector: " + sector);
   let sys = this.returnSystemAndPlanets(sector);
 console.log("LOAD UNIT BY JSON Onto Planet " + planet_idx);
-  let unit_to_add = this.returnUnit(unitname);
+  let unit_to_add = this.returnUnit(unitname, player);
   sys.p[planet_idx].units[player - 1].push(unit_to_add);
   this.saveSystemAndPlanets(sys);
   return JSON.stringify(unit_to_add);
@@ -2833,7 +2840,7 @@ console.log("LOAD UNIT BY JSON Onto Planet " + planet_idx);
 
 Imperium.prototype.loadUnitOntoShip = function loadUnitOntoShip(player, sector, ship_idx, unitname) {
   let sys = this.returnSystemAndPlanets(sector);
-  let unit_to_add = this.returnUnit(unitname);
+  let unit_to_add = this.returnUnit(unitname, player);
   sys.s.units[player - 1][ship_idx].storage.push(unit_to_add);
   this.saveSystemAndPlanets(sys);
   return JSON.stringify(unit_to_add);
@@ -2850,7 +2857,7 @@ Imperium.prototype.loadUnitOntoShipByJSON = function loadUnitOntoShipByJSON(play
 
   for (let i = 0; i < sys.s.units[player - 1].length; i++) {
     if (JSON.stringify(sys.s.units[player - 1][i]) === shipjson) {
-      let unit_to_add = this.returnUnit(unitname);
+      let unit_to_add = this.returnUnit(unitname, player);
       sys.s.units[player - 1][i].storage.push(unit_to_add);
       this.saveSystemAndPlanets(sys);
       return JSON.stringify(unit_to_add);
@@ -3645,6 +3652,7 @@ Imperium.prototype.returnShipsMovableToDestinationFromSectors = function returnS
       x.ship_idxs = [];
       x.sector = null;
       x.distance = distance[i];
+      x.adjusted_distance = [];
 
       //
       // only move from unactivated systems
@@ -3658,7 +3666,7 @@ console.log("examining sector " + sectors[i] + " -- ship found ("+this_ship.name
 
           if (this_ship.move >= distance[i]) {
 console.log("PUSHING THIS SHIP TO OUR LIST!");
-	    this_ship.adjusted_distance = distance[i];
+	    x.adjusted_distance.push(distance[i]);
             x.ships.push(this_ship);
             x.ship_idxs.push(k);
             x.sector = sectors[i];
@@ -3865,8 +3873,6 @@ Imperium.prototype.returnSystems = function returnSystems() {
     }
 
     systems[i].units[1] = [];
-    //systems[i].units[1].push(this.returnUnit("cruiser"));
-    //systems[i].units[1].push(this.returnUnit("cruiser"));
 
   }
   return systems;
@@ -5888,9 +5894,11 @@ Imperium.prototype.updateLeaderboard = function updateLeaderboard() {
 Imperium.prototype.updateSectorGraphics = function updateSectorGraphics(sector) {
 
   let sys = this.returnSystemAndPlanets(sector);
-  
-  let updated_space_graphics = 0;
-  let updated_ground_graphics = 0;
+
+  let divsector = '#hex_space_'+sector;
+  let bg = '';
+  let bgsize = '';
+
 
   for (let z = 0; z < sys.s.units.length; z++) {
 
@@ -5909,8 +5917,7 @@ Imperium.prototype.updateSectorGraphics = function updateSectorGraphics(sector) 
     //
     // space
     //
-    //if ((sys.s.units[player-1].length > 0 && updated_space_graphics == 0) || (updated_space_graphics == 0 && player == this.totalPlayers-1)) {
-    if (sys.s.units[player-1].length > 0 && updated_space_graphics == 0) {
+    if (sys.s.units[player-1].length > 0) {
 
       updated_space_graphics = 1;
 
@@ -5932,52 +5939,41 @@ Imperium.prototype.updateSectorGraphics = function updateSectorGraphics(sector) 
         if (ship.name == "dreadnaught") { dreadnaughts++; }
         if (ship.name == "flagship") { flagships++; }
 
+console.log("SECTOR "+sector+": " + ship.name);
+
       }
+
+      let space_frames = [];
+      space_frames.push("white_space_frame.png");
 
       ////////////////////
       // SPACE GRAPHICS //
       ////////////////////
-      html = '<div class="fleet">';
-
       let fleet_color = "color"+player;
       
-      // fighters
-      html += '<div class="fighters" alt="'+fighters+'">';
-      if (fighters > 0) { html += `<div class="fighter ${fleet_color}">`+fighters+`</div>`; }
-      html += '</div>';
+      if (fighters > 0 ) { space_frames.push("white_space_fighter.png"); }
+      if (carriers > 0 ) { space_frames.push("white_space_carrier.png"); }
+      if (destroyers > 0 ) { space_frames.push("white_space_destroyer.png"); }
+      if (cruisers > 0 ) { space_frames.push("white_space_cruiser.png"); }
+      if (dreadnaughts > 0 ) { space_frames.push("white_space_dreadnaught.png"); }
+      if (flagships > 0 ) { space_frames.push("white_space_flagship.png"); }
 
-      // carriers
-      html += '<div class="carriers" alt="'+carriers+'">';
-      if (carriers > 0) { html += `<div class="carrier ${fleet_color}">`+carriers+`</div>`; }
-      html += '</div>';
-
-      // destroyers
-      html += '<div class="destroyers" alt="'+destroyers+'">';
-      if (destroyers > 0) { html += `<div class="destroyer ${fleet_color}">`+destroyers+`</div>`; }
-      html += '</div>';
-
-      // cruisers
-      html += '<div class="cruisers" alt="'+cruisers+'">';
-      if (cruisers > 0) { html += `<div class="cruiser ${fleet_color}">`+cruisers+`</div>`; }
-      html += '</div>';
-
-      // dreadnaught
-      html += '<div class="dreadnaughts" alt="'+dreadnaughts+'">';
-      if (dreadnaughts > 0) { html += `<div class="dreadnaught ${fleet_color}">`+dreadnaughts+`</div>`; }
-      html += '</div>';
-
-      // flagships
-      html += '<div class="flagships" alt="'+flagships+'">';
-      if (flagships > 0) { html += `<div class="flagship ${fleet_color}">`+flagships+`</div>`; }
-      html += '</div>';
-
-      html += '</div>';
-
-      let divsector = '#hex_space_'+sector;
-      $(divsector).html(html);
-
+      bg += 'linear-gradient(to right,blue 0%,red 100%),';
+      bgsize += 'contain,';
+      for (let i = 0; i < space_frames.length; i++) {
+        bg += 'url(imperium/images/frame/'+space_frames[i]+')';
+        bgsize += 'contain';
+	if (i < space_frames.length-1) { 
+	  bg += ','; 
+	  bgsize += ','; 
+	}
+      }
     }
   }
+
+
+  $(divsector).css('background-image', bg);
+  $(divsector).css('background-size', bgsize);
 
 
   html = '';
@@ -5995,11 +5991,8 @@ Imperium.prototype.updateSectorGraphics = function updateSectorGraphics(sector) 
       total_ground_forces_of_player += sys.p[j].units[z].length;
     }
 
-    if (total_ground_forces_of_player > 0 && updated_ground_graphics == 0 || (updated_ground_graphics == 0 && player == (this.totalPlayers-1))) {
+    if (total_ground_forces_of_player > 0) {
       for (let j = 0; j < sys.p.length; j++) {
-
-
-	updated_ground_graphics = 1;
 
         let infantry     = 0;
         let spacedock    = 0;
@@ -6044,6 +6037,8 @@ Imperium.prototype.updateSectorGraphics = function updateSectorGraphics(sector) 
 
   divsector = '#hex_ground_' + sector;
   $(divsector).html(html);
+
+
 };
 ///////////////
 // webServer //
@@ -6063,6 +6058,16 @@ Imperium.prototype.webServer = function webServer(app, expressapp) {
   });
   expressapp.get('/imperium/images/:imagefile', function (req, res) {
     var imgf = '/web/images/' + req.params.imagefile;
+
+    if (imgf.indexOf("\/") != false) {
+      return;
+    }
+
+    res.sendFile(__dirname + imgf);
+    return;
+  });
+  expressapp.get('/imperium/images/frame/:imagefile', function (req, res) {
+    var imgf = '/web/images/frame/' + req.params.imagefile;
 
     if (imgf.indexOf("\/") != false) {
       return;
